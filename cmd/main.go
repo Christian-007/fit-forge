@@ -19,25 +19,29 @@ func main() {
 	// Accepting `-addr="{port}"` flag via terminal
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
-	// Instantiate the all application dependencies
-	appCtx := domains.AppContext{
-		Logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
-	}
-
+	// Initialize logger
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	
 	// Load `.env` file
 	err := godotenv.Load()
 	if err != nil {
-		appCtx.Logger.Error(err.Error())
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
-
+	
 	// Open DB connection
 	pool, err := openDB()
 	if err != nil {
-		appCtx.Logger.Error(err.Error())
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 	defer pool.Close()
+	
+	// Instantiate the all application dependencies
+	appCtx := domains.AppContext{
+		Logger: logger,
+		Db: pool,
+	}
 
 	// HTTP Server configurations (Non TLS)
 	server := &http.Server{
@@ -49,10 +53,10 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	appCtx.Logger.Info("starting server", "addr", *addr)
+	logger.Info("starting server", "addr", *addr)
 
 	err = server.ListenAndServe()
-	appCtx.Logger.Error(err.Error())
+	logger.Error(err.Error())
 }
 
 func openDB() (*pgxpool.Pool, error) {

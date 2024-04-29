@@ -14,7 +14,7 @@ func Routes(appCtx domains.AppContext) http.Handler {
 
 	logRequest := middlewares.NewLogRequest(appCtx.Logger)
 	userHandler := handlers.NewUserHandler(handlers.UserHandlerOptions{
-		UserRepository: repositories.NewUserRepository(),
+		UserRepository: repositories.NewUserRepository(appCtx.Db),
 	})
 	mux.HandleFunc("GET /users", userHandler.GetAll)
 

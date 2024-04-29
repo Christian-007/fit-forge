@@ -22,9 +22,13 @@ func NewUserHandler(options UserHandlerOptions) UserHandler {
 }
 
 func (u UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	users := u.UserRepository.GetAll()
-	jsonRes, err := json.Marshal(users)
+	users, err := u.UserRepository.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
+	jsonRes, err := json.Marshal(users)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
