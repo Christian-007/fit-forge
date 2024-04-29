@@ -11,7 +11,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/Christian-007/fit-forge/internal/api/routers"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
@@ -32,12 +32,12 @@ func main() {
 	}
 
 	// Open DB connection
-	conn, err := openDB()
+	pool, err := openDB()
 	if err != nil {
 		appCtx.Logger.Error(err.Error())
 		os.Exit(1)
 	}
-	defer conn.Close(context.Background())
+	defer pool.Close()
 
 	// HTTP Server configurations (Non TLS)
 	server := &http.Server{
@@ -55,17 +55,17 @@ func main() {
 	appCtx.Logger.Error(err.Error())
 }
 
-func openDB() (*pgx.Conn, error) {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_URL"))
+func openDB() (*pgxpool.Pool, error) {
+	pool, err := pgxpool.New(context.Background(), os.Getenv("POSTGRES_URL"))
 	if err != nil {
 		return nil, err
 	}
 
-	err = conn.Ping(context.Background())
+	err = pool.Ping(context.Background())
 	if err != nil {
-		conn.Close(context.Background())
+		pool.Close()
 		return nil, err
 	}
 
-	return conn, nil
+	return pool, nil
 }
