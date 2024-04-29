@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log/slog"
 	"net/http"
@@ -9,6 +10,9 @@ import (
 
 	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/Christian-007/fit-forge/internal/api/routers"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -20,6 +24,22 @@ func main() {
 		Logger: slog.New(slog.NewTextHandler(os.Stdout, nil)),
 	}
 
+	// Load `.env` file
+	err := godotenv.Load()
+	if err != nil {
+		appCtx.Logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	// Open DB connection
+	conn, err := openDB()
+	if err != nil {
+		appCtx.Logger.Error(err.Error())
+		os.Exit(1)
+	}
+	defer conn.Close(context.Background())
+
+	// HTTP Server configurations (Non TLS)
 	server := &http.Server{
 		Addr:         *addr,
 		Handler:      routers.Routes(appCtx),
@@ -31,6 +51,21 @@ func main() {
 
 	appCtx.Logger.Info("starting server", "addr", *addr)
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	appCtx.Logger.Error(err.Error())
+}
+
+func openDB() (*pgx.Conn, error) {
+	conn, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_URL"))
+	if err != nil {
+		return nil, err
+	}
+
+	err = conn.Ping(context.Background())
+	if err != nil {
+		conn.Close(context.Background())
+		return nil, err
+	}
+
+	return conn, nil
 }
