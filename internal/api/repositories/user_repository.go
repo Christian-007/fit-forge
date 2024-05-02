@@ -29,3 +29,20 @@ func (u UserRepository) GetAll() ([]domains.User, error) {
 
 	return users, nil
 }
+
+func (u UserRepository) GetOne(id int) (domains.User, error) {
+	query := "SELECT * FROM users WHERE id=$1"
+	rows, err := u.db.Query(context.Background(), query, id)
+	if err != nil {
+		return domains.User{}, err
+	}
+	
+	defer rows.Close()
+
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domains.User])
+	if err != nil {
+		return domains.User{}, err
+	}
+
+	return user, nil
+}

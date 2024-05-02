@@ -17,6 +17,7 @@ func Routes(appCtx domains.AppContext) http.Handler {
 		UserRepository: repositories.NewUserRepository(appCtx.Pool),
 	})
 	mux.HandleFunc("GET /users", userHandler.GetAll)
+	mux.HandleFunc("GET /users/{id}", userHandler.GetOne)
 
 	return logRequest(mux)
 }
