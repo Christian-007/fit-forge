@@ -9,14 +9,14 @@ import (
 )
 
 type UserRepository struct {
-	db *pgxpool.Pool
+	db    *pgxpool.Pool
 	users []domains.User
 }
 
 func NewUserRepository(pool *pgxpool.Pool) UserRepository {
 	return UserRepository{
 		users: []domains.User{},
-		db: pool,
+		db:    pool,
 	}
 }
 

@@ -7,6 +7,16 @@ import (
 )
 
 type AppContext struct {
+	AppContextOptions
+}
+
+type AppContextOptions struct {
 	Logger *slog.Logger
-	Db *pgxpool.Pool
+	Pool   *pgxpool.Pool
+}
+
+func NewAppContext(options AppContextOptions) AppContext {
+	return AppContext{
+		options,
+	}
 }

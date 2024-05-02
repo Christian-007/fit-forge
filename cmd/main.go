@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"log/slog"
 	"net/http"
@@ -10,8 +9,8 @@ import (
 
 	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/Christian-007/fit-forge/internal/api/routers"
+	"github.com/Christian-007/fit-forge/internal/db"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
@@ -21,27 +20,27 @@ func main() {
 
 	// Initialize logger
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	
+
 	// Load `.env` file
 	err := godotenv.Load()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
-	
+
 	// Open DB connection
-	pool, err := openDB()
+	pool, err := db.OpenPostgresDbPool(os.Getenv("POSTGRES_URL"))
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 	defer pool.Close()
-	
+
 	// Instantiate the all application dependencies
-	appCtx := domains.AppContext{
+	appCtx := domains.NewAppContext(domains.AppContextOptions{
 		Logger: logger,
-		Db: pool,
-	}
+		Pool:   pool,
+	})
 
 	// HTTP Server configurations (Non TLS)
 	server := &http.Server{
@@ -57,19 +56,4 @@ func main() {
 
 	err = server.ListenAndServe()
 	logger.Error(err.Error())
-}
-
-func openDB() (*pgxpool.Pool, error) {
-	pool, err := pgxpool.New(context.Background(), os.Getenv("POSTGRES_URL"))
-	if err != nil {
-		return nil, err
-	}
-
-	err = pool.Ping(context.Background())
-	if err != nil {
-		pool.Close()
-		return nil, err
-	}
-
-	return pool, nil
 }
