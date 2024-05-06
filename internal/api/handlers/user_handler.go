@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
 
+	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/Christian-007/fit-forge/internal/api/repositories"
+	"github.com/Christian-007/fit-forge/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -31,15 +32,8 @@ func (u UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonRes, err := json.Marshal(users)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonRes)
+	res := domains.CollectionRes[domains.User]{Results: users}
+	utils.SendResponse(w, http.StatusOK, res)
 }
 
 func (u UserHandler) GetOne(w http.ResponseWriter, r *http.Request) {
@@ -60,13 +54,5 @@ func (u UserHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonRes, err := json.Marshal(user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonRes)
+	utils.SendResponse(w, http.StatusOK, user)
 }
