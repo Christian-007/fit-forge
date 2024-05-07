@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -17,6 +18,7 @@ type UserHandler struct {
 
 type UserHandlerOptions struct {
 	UserRepository repositories.UserRepository
+	Logger *slog.Logger
 }
 
 func NewUserHandler(options UserHandlerOptions) UserHandler {
@@ -28,7 +30,8 @@ func NewUserHandler(options UserHandlerOptions) UserHandler {
 func (u UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	users, err := u.UserRepository.GetAll()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
@@ -39,18 +42,21 @@ func (u UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 func (u UserHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
-		http.NotFound(w, r)
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
 		return
 	}
 
 	user, err := u.UserRepository.GetOne(userId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			http.NotFound(w,r)
+			u.Logger.Error(err.Error())
+			utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
 			return
 		}
 
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
