@@ -1,13 +1,16 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/Christian-007/fit-forge/internal/api/domains"
+	"github.com/Christian-007/fit-forge/internal/api/dto"
 	"github.com/Christian-007/fit-forge/internal/api/repositories"
+	"github.com/Christian-007/fit-forge/internal/api/services"
 	"github.com/Christian-007/fit-forge/internal/utils"
 	"github.com/jackc/pgx/v5"
 )
@@ -18,7 +21,8 @@ type UserHandler struct {
 
 type UserHandlerOptions struct {
 	UserRepository repositories.UserRepository
-	Logger *slog.Logger
+	UserService    services.UserService
+	Logger         *slog.Logger
 }
 
 func NewUserHandler(options UserHandlerOptions) UserHandler {
@@ -61,4 +65,29 @@ func (u UserHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendResponse(w, http.StatusOK, user)
+}
+
+func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+	var createUserRequest dto.CreateUserRequest
+	err := json.NewDecoder(r.Body).Decode(&createUserRequest)
+	if err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	if err = createUserRequest.Validate(); err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: err.Error()})
+		return
+	}
+
+	userResponse, err := u.UserService.Create(createUserRequest)
+	if err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	utils.SendResponse(w, http.StatusOK, userResponse)
 }

@@ -36,7 +36,7 @@ func (u UserRepository) GetOne(id int) (domains.User, error) {
 	if err != nil {
 		return domains.User{}, err
 	}
-	
+
 	defer rows.Close()
 
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domains.User])
@@ -45,4 +45,22 @@ func (u UserRepository) GetOne(id int) (domains.User, error) {
 	}
 
 	return user, nil
+}
+
+func (u UserRepository) Create(user domains.User) (domains.User, error) {
+	query := "INSERT INTO users(name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, password, created_at"
+
+	var insertedUser domains.User
+	err := u.db.QueryRow(context.Background(), query, user.Name, user.Email, user.Password).Scan(
+		&insertedUser.Id,
+		&insertedUser.Name,
+		&insertedUser.Email,
+		&insertedUser.Password,
+		&insertedUser.CreatedAt,
+	)
+	if err != nil {
+		return domains.User{}, err
+	}
+
+	return insertedUser, nil
 }
