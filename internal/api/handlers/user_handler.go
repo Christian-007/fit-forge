@@ -32,14 +32,14 @@ func NewUserHandler(options UserHandlerOptions) UserHandler {
 }
 
 func (u UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	users, err := u.UserRepository.GetAll()
+	userResponses, err := u.UserService.GetAll()
 	if err != nil {
 		u.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
-	res := domains.CollectionRes[domains.User]{Results: users}
+	res := domains.CollectionRes[dto.UserResponse]{Results: userResponses}
 	utils.SendResponse(w, http.StatusOK, res)
 }
 
