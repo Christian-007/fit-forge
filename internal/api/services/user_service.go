@@ -1,9 +1,13 @@
 package services
 
 import (
+	"errors"
+
+	"github.com/Christian-007/fit-forge/internal/api/apperrors"
 	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/Christian-007/fit-forge/internal/api/dto"
 	"github.com/Christian-007/fit-forge/internal/api/repositories"
+	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -37,6 +41,23 @@ func (u UserService) GetAll() ([]dto.UserResponse, error) {
 	}
 
 	return userResponses, nil
+}
+
+func (u UserService) GetOne(id int) (dto.UserResponse, error) {
+	user, err := u.UserRepository.GetOne(id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.UserResponse{}, apperrors.ErrUserNotFound
+		}
+
+		return dto.UserResponse{}, err
+	}
+
+	return dto.UserResponse{
+		Id:    user.Id,
+		Name:  user.Name,
+		Email: user.Email,
+	}, nil
 }
 
 func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserResponse, error) {

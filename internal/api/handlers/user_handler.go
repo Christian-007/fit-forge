@@ -2,17 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
 
+	"github.com/Christian-007/fit-forge/internal/api/apperrors"
 	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/Christian-007/fit-forge/internal/api/dto"
 	"github.com/Christian-007/fit-forge/internal/api/repositories"
 	"github.com/Christian-007/fit-forge/internal/api/services"
 	"github.com/Christian-007/fit-forge/internal/utils"
-	"github.com/jackc/pgx/v5"
 )
 
 type UserHandler struct {
@@ -51,9 +50,9 @@ func (u UserHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := u.UserRepository.GetOne(userId)
+	user, err := u.UserService.GetOne(userId)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if err == apperrors.ErrUserNotFound {
 			u.Logger.Error(err.Error())
 			utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
 			return
