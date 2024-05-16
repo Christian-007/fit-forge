@@ -33,11 +33,7 @@ func (u UserService) GetAll() ([]dto.UserResponse, error) {
 
 	userResponses := make([]dto.UserResponse, len(users))
 	for i, user := range users {
-		userResponses[i] = dto.UserResponse{
-			Id:    user.Id,
-			Name:  user.Name,
-			Email: user.Email,
-		}
+		userResponses[i] = toUserResponse(user)
 	}
 
 	return userResponses, nil
@@ -53,11 +49,7 @@ func (u UserService) GetOne(id int) (dto.UserResponse, error) {
 		return dto.UserResponse{}, err
 	}
 
-	return dto.UserResponse{
-		Id:    user.Id,
-		Name:  user.Name,
-		Email: user.Email,
-	}, nil
+	return toUserResponse(user), nil
 }
 
 func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserResponse, error) {
@@ -66,20 +58,24 @@ func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserRe
 		return dto.UserResponse{}, err
 	}
 
-	user := domains.UserModel{
+	userModel := domains.UserModel{
 		Name:     createUserRequest.Name,
 		Email:    createUserRequest.Email,
 		Password: hashedPassword,
 	}
 
-	userDb, err := u.UserRepository.Create(user)
+	createdUser, err := u.UserRepository.Create(userModel)
 	if err != nil {
 		return dto.UserResponse{}, err
 	}
 
+	return toUserResponse(createdUser), nil
+}
+
+func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 	return dto.UserResponse{
-		Id:    userDb.Id,
-		Name:  userDb.Name,
-		Email: userDb.Email,
-	}, nil
+		Id:    userModel.Id,
+		Name:  userModel.Name,
+		Email: userModel.Email,
+	}
 }
