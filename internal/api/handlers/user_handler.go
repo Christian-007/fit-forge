@@ -9,7 +9,6 @@ import (
 	"github.com/Christian-007/fit-forge/internal/api/apperrors"
 	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/Christian-007/fit-forge/internal/api/dto"
-	"github.com/Christian-007/fit-forge/internal/api/repositories"
 	"github.com/Christian-007/fit-forge/internal/api/services"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
@@ -19,7 +18,6 @@ type UserHandler struct {
 }
 
 type UserHandlerOptions struct {
-	UserRepository repositories.UserRepository
 	UserService    services.UserService
 	Logger         *slog.Logger
 }
