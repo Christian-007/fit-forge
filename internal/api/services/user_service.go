@@ -66,7 +66,7 @@ func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserRe
 		return dto.UserResponse{}, err
 	}
 
-	user := domains.User{
+	user := domains.UserModel{
 		Name:     createUserRequest.Name,
 		Email:    createUserRequest.Email,
 		Password: hashedPassword,

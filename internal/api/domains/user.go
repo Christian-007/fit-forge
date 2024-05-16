@@ -2,7 +2,7 @@ package domains
 
 import "time"
 
-type User struct {
+type UserModel struct {
 	Id        int       `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
