@@ -18,8 +18,8 @@ type UserHandler struct {
 }
 
 type UserHandlerOptions struct {
-	UserService    services.UserService
-	Logger         *slog.Logger
+	UserService services.UserService
+	Logger      *slog.Logger
 }
 
 func NewUserHandler(options UserHandlerOptions) UserHandler {
@@ -87,4 +87,28 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendResponse(w, http.StatusOK, userResponse)
+}
+
+func (u UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: "Invalid ID"})
+		return
+	}
+
+	err = u.UserService.Delete(userId)
+	if err != nil {
+		if err == apperrors.ErrUserNotFound {
+			u.Logger.Error(err.Error())
+			utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
+			return
+		}
+
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

@@ -72,6 +72,15 @@ func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserRe
 	return toUserResponse(createdUser), nil
 }
 
+func (u UserService) Delete(id int) error {
+	err := u.UserRepository.Delete(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 	return dto.UserResponse{
 		Id:    userModel.Id,

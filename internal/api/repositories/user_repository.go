@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 
+	"github.com/Christian-007/fit-forge/internal/api/apperrors"
 	"github.com/Christian-007/fit-forge/internal/api/domains"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -63,4 +64,19 @@ func (u UserRepository) Create(user domains.UserModel) (domains.UserModel, error
 	}
 
 	return insertedUser, nil
+}
+
+func (u UserRepository) Delete(id int) error {
+	query := "DELETE FROM users WHERE id = $1"
+
+	cmdTag, err := u.db.Exec(context.Background(), query, id)
+	if err != nil {
+		return err
+	}
+
+	if cmdTag.RowsAffected() == 0 {
+		return apperrors.ErrUserNotFound
+	}
+
+	return nil
 }
