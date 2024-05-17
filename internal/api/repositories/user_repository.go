@@ -27,6 +27,8 @@ func (u UserRepository) GetAll() ([]domains.UserModel, error) {
 	if err != nil {
 		return []domains.UserModel{}, err
 	}
+	
+	defer rows.Close()
 
 	return users, nil
 }
