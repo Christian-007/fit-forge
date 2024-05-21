@@ -129,6 +129,12 @@ func (u UserHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = updateUserRequest.Validate(); err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: err.Error()})
+		return
+	}
+
 	user, err := u.UserService.UpdateOne(userId, updateUserRequest)
 	if err != nil {
 		if err == apperrors.ErrUserNotFound {
