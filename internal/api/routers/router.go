@@ -25,6 +25,7 @@ func Routes(appCtx domains.AppContext) http.Handler {
 	mux.HandleFunc("GET /users/{id}", userHandler.GetOne)
 	mux.HandleFunc("POST /users", userHandler.Create)
 	mux.HandleFunc("DELETE /users/{id}", userHandler.Delete)
+	mux.HandleFunc("PATCH /users/{id}", userHandler.UpdateOne)
 
 	return logRequest(mux)
 }

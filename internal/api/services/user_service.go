@@ -81,6 +81,47 @@ func (u UserService) Delete(id int) error {
 	return nil
 }
 
+func (u UserService) UpdateOne(id int, updateUserRequest dto.UpdateUserRequest) (dto.UserResponse, error) {
+	userModel, err := toUserModel(updateUserRequest)
+	if err != nil {
+		return dto.UserResponse{}, err
+	}
+
+	user, err := u.UserRepository.UpdateOne(id, userModel)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.UserResponse{}, apperrors.ErrUserNotFound
+		}
+
+		return dto.UserResponse{}, err
+	}
+
+	return toUserResponse(user), nil
+}
+
+func toUserModel(updateUserRequest dto.UpdateUserRequest) (domains.UserModel, error) {
+	var userModel domains.UserModel
+
+	if updateUserRequest.Email != nil {
+		userModel.Email = *updateUserRequest.Email
+	}
+
+	if updateUserRequest.Name != nil {
+		userModel.Name = *updateUserRequest.Name
+	}
+
+	if updateUserRequest.Password != nil {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*updateUserRequest.Password), 12)
+		if err != nil {
+			return domains.UserModel{}, err
+		}
+
+		userModel.Password = hashedPassword
+	}
+
+	return userModel, nil
+}
+
 func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 	return dto.UserResponse{
 		Id:    userModel.Id,

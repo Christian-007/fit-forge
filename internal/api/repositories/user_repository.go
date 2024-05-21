@@ -27,7 +27,7 @@ func (u UserRepository) GetAll() ([]domains.UserModel, error) {
 	if err != nil {
 		return []domains.UserModel{}, err
 	}
-	
+
 	defer rows.Close()
 
 	return users, nil
@@ -81,4 +81,46 @@ func (u UserRepository) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func (u UserRepository) UpdateOne(id int, updateUser domains.UserModel) (domains.UserModel, error) {
+	args := createUpdateUserPgxArgs(id, updateUser)
+	query := `
+		UPDATE users 
+		SET name = COALESCE(@name, name), email = COALESCE(@email, email), password = COALESCE(@password, password) 
+		WHERE id = @id
+		RETURNING id, name, email, password, created_at
+	`
+
+	var user domains.UserModel
+	err := u.db.QueryRow(context.Background(), query, args).Scan(
+		&user.Id,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		return domains.UserModel{}, err
+	}
+
+	return user, nil
+}
+
+func createUpdateUserPgxArgs(id int, updateUser domains.UserModel) pgx.NamedArgs {
+	result := pgx.NamedArgs{
+		"id": id,
+	}
+
+	if updateUser.Name != "" {
+		result["name"] = updateUser.Name
+	}
+	if updateUser.Email != "" {
+		result["email"] = updateUser.Email
+	}
+	if len(updateUser.Password) > 0 {
+		result["password"] = updateUser.Password
+	}
+
+	return result
 }

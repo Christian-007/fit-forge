@@ -24,3 +24,9 @@ func (c CreateUserRequest) Validate() error {
 		validation.Field(&c.Password, validation.Required),
 	)
 }
+
+type UpdateUserRequest struct {
+	Name     *string `json:"name"`
+	Email    *string `json:"email"`
+	Password *string `json:"password"`
+}

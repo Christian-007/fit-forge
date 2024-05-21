@@ -112,3 +112,35 @@ func (u UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (u UserHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
+	userId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: "Invalid ID"})
+		return
+	}
+
+	var updateUserRequest dto.UpdateUserRequest
+	err = json.NewDecoder(r.Body).Decode(&updateUserRequest)
+	if err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	user, err := u.UserService.UpdateOne(userId, updateUserRequest)
+	if err != nil {
+		if err == apperrors.ErrUserNotFound {
+			u.Logger.Error(err.Error())
+			utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
+			return
+		}
+
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	utils.SendResponse(w, http.StatusOK, user)
+}
