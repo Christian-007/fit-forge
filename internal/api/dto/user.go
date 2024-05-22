@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"github.com/Christian-007/fit-forge/internal/utils"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -33,19 +34,11 @@ type UpdateUserRequest struct {
 
 func (u UpdateUserRequest) Validate() error {
 	return validation.ValidateStruct(&u,
-		validation.Field(&u.Name, validation.By(func(value interface{}) error {
-			if value == nil {
-				return nil
-			}
-
-			return validation.Validate(value, validation.Length(2, 200))
-		})),
-		validation.Field(&u.Email, validation.By(func(value interface{}) error {
-			if value == nil {
-				return nil
-			}
-
-			return validation.Validate(value, is.Email)
-		})),
+		validation.Field(&u.Name, validation.By(utils.ValidateWhenNotNil([]validation.Rule{
+			validation.Length(2, 200),
+		}))),
+		validation.Field(&u.Email, validation.By(utils.ValidateWhenNotNil([]validation.Rule{
+			is.Email,
+		}))),
 	)
 }
