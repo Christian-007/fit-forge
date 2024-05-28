@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"github.com/Christian-007/fit-forge/internal/utils"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -32,13 +31,10 @@ type UpdateUserRequest struct {
 	Password *string `json:"password"`
 }
 
+// As of 28 May '24 does not support an empty string update
 func (u UpdateUserRequest) Validate() error {
 	return validation.ValidateStruct(&u,
-		validation.Field(&u.Name, validation.By(utils.ValidateWhenNotNil([]validation.Rule{
-			validation.Length(2, 200),
-		}))),
-		validation.Field(&u.Email, validation.By(utils.ValidateWhenNotNil([]validation.Rule{
-			is.Email,
-		}))),
+		validation.Field(&u.Name, validation.NilOrNotEmpty, validation.Length(2, 200)),
+		validation.Field(&u.Email, validation.NilOrNotEmpty, is.Email),
 	)
 }
