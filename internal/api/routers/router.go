@@ -14,10 +14,10 @@ func Routes(appCtx domains.AppContext) http.Handler {
 	mux := http.NewServeMux()
 
 	logRequest := middlewares.NewLogRequest(appCtx.Logger)
-	userRepository := repositories.NewUserRepository(appCtx.Pool)
+	userRepositoryPg := repositories.NewUserRepositoryPg(appCtx.Pool)
 	userHandler := handlers.NewUserHandler(handlers.UserHandlerOptions{
 		UserService: services.NewUserService(services.UserServiceOptions{
-			UserRepository: userRepository,
+			UserRepository: userRepositoryPg,
 		}),
 		Logger: appCtx.Logger,
 	})
