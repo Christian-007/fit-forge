@@ -12,7 +12,7 @@ package mock_repositories
 import (
 	reflect "reflect"
 
-	domains "github.com/Christian-007/fit-forge/internal/api/domains"
+	domains "github.com/Christian-007/fit-forge/internal/app/users/domains"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -1,13 +1,12 @@
-package routers
+package web
 
 import (
 	"net/http"
 
-	"github.com/Christian-007/fit-forge/internal/api/domains"
-	"github.com/Christian-007/fit-forge/internal/api/handlers"
-	"github.com/Christian-007/fit-forge/internal/api/middlewares"
-	"github.com/Christian-007/fit-forge/internal/api/repositories"
-	"github.com/Christian-007/fit-forge/internal/api/services"
+	"github.com/Christian-007/fit-forge/internal/app/users/domains"
+	"github.com/Christian-007/fit-forge/internal/app/users/repositories"
+	"github.com/Christian-007/fit-forge/internal/app/users/services"
+	"github.com/Christian-007/fit-forge/internal/pkg/middlewares"
 )
 
 func Routes(appCtx domains.AppContext) http.Handler {
@@ -15,7 +14,7 @@ func Routes(appCtx domains.AppContext) http.Handler {
 
 	logRequest := middlewares.NewLogRequest(appCtx.Logger)
 	userRepositoryPg := repositories.NewUserRepositoryPg(appCtx.Pool)
-	userHandler := handlers.NewUserHandler(handlers.UserHandlerOptions{
+	userHandler := NewUserHandler(UserHandlerOptions{
 		UserService: services.NewUserService(services.UserServiceOptions{
 			UserRepository: userRepositoryPg,
 		}),

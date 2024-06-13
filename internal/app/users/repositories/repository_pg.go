@@ -3,8 +3,8 @@ package repositories
 import (
 	"context"
 
-	"github.com/Christian-007/fit-forge/internal/api/apperrors"
-	"github.com/Christian-007/fit-forge/internal/api/domains"
+	"github.com/Christian-007/fit-forge/internal/app/users/domains"
+	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

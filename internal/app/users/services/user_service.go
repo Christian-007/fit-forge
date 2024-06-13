@@ -3,10 +3,10 @@ package services
 import (
 	"errors"
 
-	"github.com/Christian-007/fit-forge/internal/api/apperrors"
-	"github.com/Christian-007/fit-forge/internal/api/domains"
-	"github.com/Christian-007/fit-forge/internal/api/dto"
-	"github.com/Christian-007/fit-forge/internal/api/repositories"
+	"github.com/Christian-007/fit-forge/internal/app/users/domains"
+	"github.com/Christian-007/fit-forge/internal/app/users/dto"
+	"github.com/Christian-007/fit-forge/internal/app/users/repositories"
+	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )

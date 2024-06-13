@@ -1,4 +1,4 @@
-package handlers
+package web
 
 import (
 	"encoding/json"
@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Christian-007/fit-forge/internal/api/apperrors"
-	"github.com/Christian-007/fit-forge/internal/api/domains"
-	"github.com/Christian-007/fit-forge/internal/api/dto"
-	"github.com/Christian-007/fit-forge/internal/api/services"
+	"github.com/Christian-007/fit-forge/internal/app/users/domains"
+	"github.com/Christian-007/fit-forge/internal/app/users/dto"
+	"github.com/Christian-007/fit-forge/internal/app/users/services"
+	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 

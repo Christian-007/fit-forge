@@ -1,6 +1,6 @@
 package repositories
 
-import "github.com/Christian-007/fit-forge/internal/api/domains"
+import "github.com/Christian-007/fit-forge/internal/app/users/domains"
 
 //go:generate mockgen -source=user_repository.go -destination=mocks/user_repository.go
 type UserRepository interface {
