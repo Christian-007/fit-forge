@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/Christian-007/fit-forge/internal/app/users/delivery/web"
 	"github.com/Christian-007/fit-forge/internal/app/users/domains"
 	"github.com/Christian-007/fit-forge/internal/db"
 
@@ -45,7 +44,7 @@ func main() {
 	// HTTP Server configurations (Non TLS)
 	server := &http.Server{
 		Addr:         *addr,
-		Handler:      web.Routes(appCtx),
+		Handler:      Routes(appCtx),
 		ErrorLog:     slog.NewLogLogger(appCtx.Logger.Handler(), slog.LevelError),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
