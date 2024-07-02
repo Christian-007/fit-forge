@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/Christian-007/fit-forge/internal/app/users/domains"
 	"github.com/Christian-007/fit-forge/internal/db"
+	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 
 	"github.com/joho/godotenv"
 )
@@ -36,7 +36,7 @@ func main() {
 	defer pool.Close()
 
 	// Instantiate the all application dependencies
-	appCtx := domains.NewAppContext(domains.AppContextOptions{
+	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
 		Logger: logger,
 		Pool:   pool,
 	})

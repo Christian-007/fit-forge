@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Christian-007/fit-forge/internal/app/users/domains"
 	"github.com/Christian-007/fit-forge/internal/app/users/dto"
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
+	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
@@ -32,11 +32,11 @@ func (u UserHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	userResponses, err := u.UserService.GetAll()
 	if err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
-	res := domains.CollectionRes[dto.UserResponse]{Results: userResponses}
+	res := apphttp.CollectionRes[dto.UserResponse]{Results: userResponses}
 	utils.SendResponse(w, http.StatusOK, res)
 }
 
@@ -44,7 +44,7 @@ func (u UserHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
+		utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Record not found"})
 		return
 	}
 
@@ -52,12 +52,12 @@ func (u UserHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == apperrors.ErrUserNotFound {
 			u.Logger.Error(err.Error())
-			utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
+			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Record not found"})
 			return
 		}
 
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
@@ -69,20 +69,20 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&createUserRequest)
 	if err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
 	if err = createUserRequest.Validate(); err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: err.Error()})
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: err.Error()})
 		return
 	}
 
 	userResponse, err := u.UserService.Create(createUserRequest)
 	if err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
@@ -93,7 +93,7 @@ func (u UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: "Invalid ID"})
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "Invalid ID"})
 		return
 	}
 
@@ -101,12 +101,12 @@ func (u UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == apperrors.ErrUserNotFound {
 			u.Logger.Error(err.Error())
-			utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
+			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Record not found"})
 			return
 		}
 
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
@@ -117,7 +117,7 @@ func (u UserHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: "Invalid ID"})
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "Invalid ID"})
 		return
 	}
 
@@ -125,13 +125,13 @@ func (u UserHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&updateUserRequest)
 	if err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
 	if err = updateUserRequest.Validate(); err != nil {
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusBadRequest, domains.ErrorResponse{Message: err.Error()})
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: err.Error()})
 		return
 	}
 
@@ -139,12 +139,12 @@ func (u UserHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == apperrors.ErrUserNotFound {
 			u.Logger.Error(err.Error())
-			utils.SendResponse(w, http.StatusNotFound, domains.ErrorResponse{Message: "Record not found"})
+			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Record not found"})
 			return
 		}
 
 		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, domains.ErrorResponse{Message: "Internal Server Error"})
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 

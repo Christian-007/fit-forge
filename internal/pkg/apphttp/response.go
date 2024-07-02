@@ -1,4 +1,4 @@
-package domains
+package apphttp
 
 type CollectionRes[Entity any] struct {
 	Results []Entity `json:"results"`

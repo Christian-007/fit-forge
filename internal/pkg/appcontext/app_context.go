@@ -1,4 +1,4 @@
-package domains
+package appcontext
 
 import (
 	"log/slog"
