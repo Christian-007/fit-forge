@@ -64,6 +64,12 @@ func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = createTodoRequest.Validate(); err != nil {
+		t.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: err.Error()})
+		return
+	}
+
 	todoResponse, err := t.TodoService.Create(userIdInt, createTodoRequest)
 	if err != nil {
 		t.Logger.Error(err.Error())
