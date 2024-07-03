@@ -30,3 +30,21 @@ func (t TodoRepositoryPg) GetAll() ([]domains.TodoModel, error) {
 
 	return todos, nil
 }
+
+func (t TodoRepositoryPg) Create(userId int, todo domains.TodoModel) (domains.TodoModel, error) {
+	query := "INSERT INTO todos(user_id, title) VALUES ($1, $2) RETURNING *"
+
+	var insertedTodo domains.TodoModel
+	err := t.db.QueryRow(context.Background(), query, userId, todo.Title).Scan(
+		&insertedTodo.Id,
+		&insertedTodo.Title,
+		&insertedTodo.IsCompleted,
+		&insertedTodo.UserId,
+		&insertedTodo.CreatedAt,
+	)
+	if err != nil {
+		return domains.TodoModel{}, err
+	}
+
+	return insertedTodo, nil
+}

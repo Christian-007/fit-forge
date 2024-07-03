@@ -34,10 +34,23 @@ func (t TodoService) GetAll() ([]dto.TodoResponse, error) {
 	return todoResponse, nil
 }
 
-func toTodoResponse(todo domains.TodoModel) dto.TodoResponse {
+func (t TodoService) Create(userId int, createTodoRequest dto.CreateTodoRequest) (dto.TodoResponse, error) {
+	todoModel := domains.TodoModel{
+		Title: createTodoRequest.Title,
+	}
+
+	createdTodoModel, err := t.TodoRepository.Create(userId, todoModel)
+	if err != nil {
+		return dto.TodoResponse{}, err
+	}
+
+	return toTodoResponse(createdTodoModel), nil
+}
+
+func toTodoResponse(todoModel domains.TodoModel) dto.TodoResponse {
 	return dto.TodoResponse{
-		Id:          todo.Id,
-		Title:       todo.Title,
-		IsCompleted: todo.IsCompleted,
+		Id:          todoModel.Id,
+		Title:       todoModel.Title,
+		IsCompleted: todoModel.IsCompleted,
 	}
 }

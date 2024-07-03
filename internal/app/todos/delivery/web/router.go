@@ -14,7 +14,9 @@ func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
 		TodoService: services.NewTodoService(services.TodoServiceOptions{
 			TodoRepository: todoRepository,
 		}),
+		Logger: appCtx.Logger,
 	})
 
 	mux.HandleFunc("GET /todos", todoHandler.GetAll)
+	mux.HandleFunc("POST /todos", todoHandler.Create)
 }

@@ -5,3 +5,7 @@ type TodoResponse struct {
 	Title       string `json:"title"`
 	IsCompleted bool   `json:"isCompleted"`
 }
+
+type CreateTodoRequest struct {
+	Title       string `json:"title"`
+}
