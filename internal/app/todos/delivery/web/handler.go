@@ -8,6 +8,7 @@ import (
 
 	"github.com/Christian-007/fit-forge/internal/app/todos/dto"
 	"github.com/Christian-007/fit-forge/internal/app/todos/services"
+	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
@@ -78,4 +79,42 @@ func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendResponse(w, http.StatusOK, todoResponse)
+}
+
+func (t TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	todoId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		t.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "Todo ID is invalid"})
+		return
+	}
+
+	userId := r.Header.Get("userId")
+	if userId == "" {
+		t.Logger.Error("User ID is empty")
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is required"})
+		return
+	}
+
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		t.Logger.Error("User ID " + userId + " is invalid")
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is invalid"})
+		return
+	}
+
+	err = t.TodoService.Delete(todoId, userIdInt)
+	if err != nil {
+		if err == apperrors.ErrUserOrTodoNotFound {
+			t.Logger.Error(err.Error())
+			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Record not found"})
+			return
+		}
+
+		t.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

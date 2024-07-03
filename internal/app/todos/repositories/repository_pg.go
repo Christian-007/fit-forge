@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Christian-007/fit-forge/internal/app/todos/domains"
+	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -47,4 +48,19 @@ func (t TodoRepositoryPg) Create(userId int, todo domains.TodoModel) (domains.To
 	}
 
 	return insertedTodo, nil
+}
+
+func (t TodoRepositoryPg) Delete(todoId int, userId int) error {
+	query := "DELETE FROM todos WHERE id = $1 AND user_id = $2"
+
+	cmdTag, err := t.db.Exec(context.Background(), query, todoId, userId)
+	if err != nil {
+		return err
+	}
+
+	if cmdTag.RowsAffected() == 0 {
+		return apperrors.ErrUserOrTodoNotFound
+	}
+
+	return nil
 }

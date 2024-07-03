@@ -47,6 +47,15 @@ func (t TodoService) Create(userId int, createTodoRequest dto.CreateTodoRequest)
 	return toTodoResponse(createdTodoModel), nil
 }
 
+func (t TodoService) Delete(todoId int, userId int) error {
+	err := t.TodoRepository.Delete(todoId, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func toTodoResponse(todoModel domains.TodoModel) dto.TodoResponse {
 	return dto.TodoResponse{
 		Id:          todoModel.Id,
