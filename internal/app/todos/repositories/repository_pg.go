@@ -32,6 +32,23 @@ func (t TodoRepositoryPg) GetAll() ([]domains.TodoModel, error) {
 	return todos, nil
 }
 
+func (t TodoRepositoryPg) GetOne(userId int, todoId int) (domains.TodoModel, error) {
+	query := "SELECT * from todos WHERE id = $1 AND user_id = $2"
+	row, err := t.db.Query(context.Background(), query, todoId, userId)
+	if err != nil {
+		return domains.TodoModel{}, err
+	}
+
+	defer row.Close()
+
+	todo, err := pgx.CollectOneRow(row, pgx.RowToStructByName[domains.TodoModel])
+	if err != nil {
+		return domains.TodoModel{}, err
+	}
+
+	return todo, nil
+}
+
 func (t TodoRepositoryPg) Create(userId int, todo domains.TodoModel) (domains.TodoModel, error) {
 	query := "INSERT INTO todos(user_id, title) VALUES ($1, $2) RETURNING *"
 

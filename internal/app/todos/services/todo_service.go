@@ -34,6 +34,15 @@ func (t TodoService) GetAll() ([]dto.TodoResponse, error) {
 	return todoResponse, nil
 }
 
+func (t TodoService) GetOne(userId int, todoId int) (dto.TodoResponse, error) {
+	todoModel, err := t.TodoRepository.GetOne(userId, todoId)
+	if err != nil {
+		return dto.TodoResponse{}, err
+	}
+
+	return toTodoResponse(todoModel), nil
+}
+
 func (t TodoService) Create(userId int, createTodoRequest dto.CreateTodoRequest) (dto.TodoResponse, error) {
 	todoModel := domains.TodoModel{
 		Title: createTodoRequest.Title,

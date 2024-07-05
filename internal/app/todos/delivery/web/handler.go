@@ -42,6 +42,38 @@ func (t TodoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	utils.SendResponse(w, http.StatusOK, res)
 }
 
+func (t TodoHandler) GetOne(w http.ResponseWriter, r *http.Request) {
+	todoId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		t.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "Todo ID is invalid"})
+		return
+	}
+
+	userId := r.Header.Get("userId")
+	if userId == "" {
+		t.Logger.Error("User ID is empty")
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is required"})
+		return
+	}
+
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		t.Logger.Error("User ID " + userId + " is invalid")
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is invalid"})
+		return
+	}
+
+	todoResponse, err := t.TodoService.GetOne(userIdInt, todoId)
+	if err != nil {
+		t.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	utils.SendResponse(w, http.StatusOK, todoResponse)
+}
+
 func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userId := r.Header.Get("userId")
 	if userId == "" {

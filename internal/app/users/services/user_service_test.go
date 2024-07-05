@@ -92,11 +92,11 @@ var _ = Describe("User Service", func() {
 		}
 
 		When("there is no error", func() {
-			It("should return one user", func ()  {
+			It("should return one user", func() {
 				mockUserId := 1
 				mockUserResponse := dto.UserResponse{
-					Id: mockUserId,
-					Name: "John Doe",
+					Id:    mockUserId,
+					Name:  "John Doe",
 					Email: "johndoe@gmail.com",
 				}
 
@@ -109,7 +109,7 @@ var _ = Describe("User Service", func() {
 		})
 
 		When("there is an unexpected error", func() {
-			It("should return an empty user and the error", func ()  {
+			It("should return an empty user and the error", func() {
 				mockUserId := 1
 				mockEmptyUserModel := domains.UserModel{}
 				mockEmptyUserResponse := dto.UserResponse{}
@@ -124,7 +124,7 @@ var _ = Describe("User Service", func() {
 		})
 
 		When("there is no row returned", func() {
-			It("should return an empty user and the user not found error", func ()  {
+			It("should return an empty user and the user not found error", func() {
 				mockUserId := 1
 				mockEmptyUserModel := domains.UserModel{}
 				mockEmptyUserResponse := dto.UserResponse{}
