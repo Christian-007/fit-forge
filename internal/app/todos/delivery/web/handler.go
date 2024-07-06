@@ -64,9 +64,15 @@ func (t TodoHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todoResponse, err := t.TodoService.GetOne(userIdInt, todoId)
+	todoResponse, err := t.TodoService.GetOneByUserId(userIdInt, todoId)
 	if err != nil {
 		t.Logger.Error(err.Error())
+
+		if err == apperrors.ErrTodoNotFound {
+			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Todo not found"})
+			return
+		}
+
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}

@@ -32,7 +32,7 @@ func (t TodoRepositoryPg) GetAll() ([]domains.TodoModel, error) {
 	return todos, nil
 }
 
-func (t TodoRepositoryPg) GetOne(userId int, todoId int) (domains.TodoModel, error) {
+func (t TodoRepositoryPg) GetOneByUserId(userId int, todoId int) (domains.TodoModel, error) {
 	query := "SELECT * from todos WHERE id = $1 AND user_id = $2"
 	row, err := t.db.Query(context.Background(), query, todoId, userId)
 	if err != nil {

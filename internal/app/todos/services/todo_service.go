@@ -1,9 +1,13 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/Christian-007/fit-forge/internal/app/todos/domains"
 	"github.com/Christian-007/fit-forge/internal/app/todos/dto"
 	"github.com/Christian-007/fit-forge/internal/app/todos/repositories"
+	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
+	"github.com/jackc/pgx/v5"
 )
 
 type TodoService struct {
@@ -34,9 +38,12 @@ func (t TodoService) GetAll() ([]dto.TodoResponse, error) {
 	return todoResponse, nil
 }
 
-func (t TodoService) GetOne(userId int, todoId int) (dto.TodoResponse, error) {
-	todoModel, err := t.TodoRepository.GetOne(userId, todoId)
+func (t TodoService) GetOneByUserId(userId int, todoId int) (dto.TodoResponse, error) {
+	todoModel, err := t.TodoRepository.GetOneByUserId(userId, todoId)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.TodoResponse{}, apperrors.ErrTodoNotFound
+		}
 		return dto.TodoResponse{}, err
 	}
 
