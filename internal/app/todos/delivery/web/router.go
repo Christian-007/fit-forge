@@ -17,7 +17,8 @@ func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
 		Logger: appCtx.Logger,
 	})
 
-	mux.HandleFunc("GET /todos", todoHandler.GetAll)
+	mux.HandleFunc("GET /all-todos", todoHandler.GetAll)
+	mux.HandleFunc("GET /todos", todoHandler.GetAllByUserId)
 	mux.HandleFunc("GET /todos/{id}", todoHandler.GetOne)
 	mux.HandleFunc("POST /todos", todoHandler.Create)
 	mux.HandleFunc("DELETE /todos/{id}", todoHandler.Delete)

@@ -38,6 +38,20 @@ func (t TodoService) GetAll() ([]dto.TodoResponse, error) {
 	return todoResponse, nil
 }
 
+func (t TodoService) GetAllByUserId(userId int) ([]dto.TodoResponse, error) {
+	todos, err := t.TodoRepository.GetAllByUserId(userId)
+	if err != nil {
+		return []dto.TodoResponse{}, err
+	}
+
+	todoResponse := make([]dto.TodoResponse, len(todos))
+	for i, todo := range todos {
+		todoResponse[i] = toTodoResponse(todo)
+	}
+
+	return todoResponse, nil
+}
+
 func (t TodoService) GetOneByUserId(userId int, todoId int) (dto.TodoResponse, error) {
 	todoModel, err := t.TodoRepository.GetOneByUserId(userId, todoId)
 	if err != nil {

@@ -32,6 +32,20 @@ func (t TodoRepositoryPg) GetAll() ([]domains.TodoModel, error) {
 	return todos, nil
 }
 
+func (t TodoRepositoryPg) GetAllByUserId(userId int) ([]domains.TodoModel, error) {
+	query := "SELECT * FROM todos WHERE user_id = $1"
+
+	rows, _ := t.db.Query(context.Background(), query, userId)
+	todos, err := pgx.CollectRows(rows, pgx.RowToStructByName[domains.TodoModel])
+	if err != nil {
+		return []domains.TodoModel{}, err
+	}
+
+	defer rows.Close()
+
+	return todos, nil
+}
+
 func (t TodoRepositoryPg) GetOneByUserId(userId int, todoId int) (domains.TodoModel, error) {
 	query := "SELECT * from todos WHERE id = $1 AND user_id = $2"
 	row, err := t.db.Query(context.Background(), query, todoId, userId)
