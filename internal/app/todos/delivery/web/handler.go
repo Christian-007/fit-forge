@@ -29,15 +29,15 @@ func NewTodoHandler(options TodoHandlerOptions) TodoHandler {
 }
 
 func (t TodoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	todoResponse, err := t.TodoService.GetAll()
+	getAllTodosResponse, err := t.TodoService.GetAll()
 	if err != nil {
 		t.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
-	res := apphttp.CollectionRes[dto.TodoResponse]{
-		Results: todoResponse,
+	res := apphttp.CollectionRes[dto.GetAllTodosResponse]{
+		Results: getAllTodosResponse,
 	}
 	utils.SendResponse(w, http.StatusOK, res)
 }

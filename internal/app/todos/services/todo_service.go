@@ -24,18 +24,18 @@ func NewTodoService(options TodoServiceOptions) TodoService {
 	}
 }
 
-func (t TodoService) GetAll() ([]dto.TodoResponse, error) {
+func (t TodoService) GetAll() ([]dto.GetAllTodosResponse, error) {
 	todos, err := t.TodoRepository.GetAll()
 	if err != nil {
-		return []dto.TodoResponse{}, err
+		return []dto.GetAllTodosResponse{}, err
 	}
 
-	todoResponse := make([]dto.TodoResponse, len(todos))
+	getAllTodosResponse := make([]dto.GetAllTodosResponse, len(todos))
 	for i, todo := range todos {
-		todoResponse[i] = toTodoResponse(todo)
+		getAllTodosResponse[i] = toGetAllTodosResponse(todo)
 	}
 
-	return todoResponse, nil
+	return getAllTodosResponse, nil
 }
 
 func (t TodoService) GetAllByUserId(userId int) ([]dto.TodoResponse, error) {
@@ -91,5 +91,15 @@ func toTodoResponse(todoModel domains.TodoModel) dto.TodoResponse {
 		Id:          todoModel.Id,
 		Title:       todoModel.Title,
 		IsCompleted: todoModel.IsCompleted,
+	}
+}
+
+func toGetAllTodosResponse(todoModel domains.TodoModel) dto.GetAllTodosResponse {
+	return dto.GetAllTodosResponse{
+		Id:          todoModel.Id,
+		Title:       todoModel.Title,
+		IsCompleted: todoModel.IsCompleted,
+		UserId:      todoModel.UserId,
+		CreatedAt:   todoModel.CreatedAt,
 	}
 }
