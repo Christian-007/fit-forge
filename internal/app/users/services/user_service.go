@@ -52,6 +52,25 @@ func (u UserService) GetOne(id int) (dto.UserResponse, error) {
 	return toUserResponse(user), nil
 }
 
+func (u UserService) GetOneByEmail(email string) (dto.GetUserByEmailResponse, error) {
+	userModel, err := u.UserRepository.GetOneByEmail(email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.GetUserByEmailResponse{}, apperrors.ErrUserNotFound
+		}
+
+		return dto.GetUserByEmailResponse{}, err
+	}
+
+	response := dto.GetUserByEmailResponse{
+		Id:    userModel.Id,
+		Name:  userModel.Name,
+		Email: userModel.Email,
+		Password: userModel.Password,
+	}
+	return response, nil
+}
+
 func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserResponse, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createUserRequest.Password), 12)
 	if err != nil {

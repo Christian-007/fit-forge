@@ -50,6 +50,23 @@ func (u UserRepositoryPg) GetOne(id int) (domains.UserModel, error) {
 	return user, nil
 }
 
+func (u UserRepositoryPg) GetOneByEmail(email string) (domains.UserModel, error) {
+	query := "SELECT * FROM users WHERE email=$1"
+	rows, err := u.db.Query(context.Background(), query, email)
+	if err != nil {
+		return domains.UserModel{}, err
+	}
+
+	defer rows.Close()
+
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[domains.UserModel])
+	if err != nil {
+		return domains.UserModel{}, err
+	}
+
+	return user, nil
+}
+
 func (u UserRepositoryPg) Create(user domains.UserModel) (domains.UserModel, error) {
 	query := "INSERT INTO users(name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, password, created_at"
 
