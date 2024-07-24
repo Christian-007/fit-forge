@@ -1,14 +1,14 @@
 package web
 
 import (
-	"net/http"
-
 	"github.com/Christian-007/fit-forge/internal/app/todos/repositories"
 	"github.com/Christian-007/fit-forge/internal/app/todos/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
+	"github.com/go-chi/chi/v5"
 )
 
-func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
+func Routes(appCtx appcontext.AppContext) *chi.Mux{
+	r := chi.NewRouter()
 	todoRepository := repositories.NewTodoRepositoryPg(appCtx.Pool)
 	todoHandler := NewTodoHandler(TodoHandlerOptions{
 		TodoService: services.NewTodoService(services.TodoServiceOptions{
@@ -17,9 +17,11 @@ func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
 		Logger: appCtx.Logger,
 	})
 
-	mux.HandleFunc("GET /all-todos", todoHandler.GetAll)
-	mux.HandleFunc("GET /todos", todoHandler.GetAllByUserId)
-	mux.HandleFunc("GET /todos/{id}", todoHandler.GetOne)
-	mux.HandleFunc("POST /todos", todoHandler.Create)
-	mux.HandleFunc("DELETE /todos/{id}", todoHandler.Delete)
+	r.Get("/all", todoHandler.GetAll)
+	r.Get("/", todoHandler.GetAllByUserId)
+	r.Get("/{id}", todoHandler.GetOne)
+	r.Post("/", todoHandler.Create)
+	r.Delete("/{id}", todoHandler.Delete)
+
+	return r
 }

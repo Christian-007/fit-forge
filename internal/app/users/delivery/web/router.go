@@ -1,14 +1,14 @@
 package web
 
 import (
-	"net/http"
-
 	"github.com/Christian-007/fit-forge/internal/app/users/repositories"
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
+	"github.com/go-chi/chi/v5"
 )
 
-func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
+func Routes(appCtx appcontext.AppContext) *chi.Mux{
+	r := chi.NewRouter()
 	userRepositoryPg := repositories.NewUserRepositoryPg(appCtx.Pool)
 	userHandler := NewUserHandler(UserHandlerOptions{
 		UserService: services.NewUserService(services.UserServiceOptions{
@@ -17,9 +17,11 @@ func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
 		Logger: appCtx.Logger,
 	})
 
-	mux.HandleFunc("GET /users", userHandler.GetAll)
-	mux.HandleFunc("GET /users/{id}", userHandler.GetOne)
-	mux.HandleFunc("POST /users", userHandler.Create)
-	mux.HandleFunc("DELETE /users/{id}", userHandler.Delete)
-	mux.HandleFunc("PATCH /users/{id}", userHandler.UpdateOne)
+	r.Get("/", userHandler.GetAll)
+	r.Get("/{id}", userHandler.GetOne)
+	r.Post("/", userHandler.Create)
+	r.Delete("/{id}", userHandler.Delete)
+	r.Patch("/{id}", userHandler.UpdateOne)
+
+	return r
 }

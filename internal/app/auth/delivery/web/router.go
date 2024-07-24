@@ -1,15 +1,15 @@
 package web
 
 import (
-	"net/http"
-
 	authservice "github.com/Christian-007/fit-forge/internal/app/auth/services"
 	userrepositories "github.com/Christian-007/fit-forge/internal/app/users/repositories"
 	userservices "github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
+	"github.com/go-chi/chi/v5"
 )
 
-func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
+func Routes(appCtx appcontext.AppContext) *chi.Mux {
+	r := chi.NewRouter()
 	userRepositoryPg := userrepositories.NewUserRepositoryPg(appCtx.Pool)
 	userService := userservices.NewUserService(userservices.UserServiceOptions{
 		UserRepository: userRepositoryPg,
@@ -24,5 +24,7 @@ func Routes(mux *http.ServeMux, appCtx appcontext.AppContext) {
 		Logger: appCtx.Logger,
 	})
 
-	mux.HandleFunc("POST /auth/login", authHandler.Login)
+	r.Post("/login", authHandler.Login)
+
+	return r
 }
