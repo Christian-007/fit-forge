@@ -18,7 +18,7 @@ type AuthHandler struct {
 
 type AuthHandlerOptions struct {
 	AuthService services.AuthService
-	Logger *slog.Logger
+	Logger      *slog.Logger
 }
 
 func NewAuthHandler(options AuthHandlerOptions) AuthHandler {

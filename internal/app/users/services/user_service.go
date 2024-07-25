@@ -63,9 +63,9 @@ func (u UserService) GetOneByEmail(email string) (dto.GetUserByEmailResponse, er
 	}
 
 	response := dto.GetUserByEmailResponse{
-		Id:    userModel.Id,
-		Name:  userModel.Name,
-		Email: userModel.Email,
+		Id:       userModel.Id,
+		Name:     userModel.Name,
+		Email:    userModel.Email,
 		Password: userModel.Password,
 	}
 	return response, nil

@@ -12,10 +12,10 @@ type UserResponse struct {
 }
 
 type GetUserByEmailResponse struct {
-	Id    int    `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Password  []byte    `json:"password"`
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password []byte `json:"password"`
 }
 
 type CreateUserRequest struct {

@@ -13,7 +13,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	r := chi.NewRouter()
 
 	logRequest := middlewares.NewLogRequest(appCtx.Logger)
-	
+
 	r.Use(logRequest)
 
 	r.Mount("/users", usersweb.Routes(appCtx))

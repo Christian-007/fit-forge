@@ -21,7 +21,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 
 	authHandler := NewAuthHandler(AuthHandlerOptions{
 		AuthService: authService,
-		Logger: appCtx.Logger,
+		Logger:      appCtx.Logger,
 	})
 
 	r.Post("/login", authHandler.Login)

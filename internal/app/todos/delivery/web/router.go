@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func Routes(appCtx appcontext.AppContext) *chi.Mux{
+func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	r := chi.NewRouter()
 	todoRepository := repositories.NewTodoRepositoryPg(appCtx.Pool)
 	todoHandler := NewTodoHandler(TodoHandlerOptions{

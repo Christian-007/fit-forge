@@ -39,8 +39,8 @@ func (a AuthService) Authenticate(loginRequest authdto.LoginRequest) (userdto.Us
 	}
 
 	response := userdto.UserResponse{
-		Id: user.Id,
-		Name: user.Name,
+		Id:    user.Id,
+		Name:  user.Name,
 		Email: user.Email,
 	}
 	return response, nil
@@ -65,7 +65,7 @@ func (a AuthService) CreateToken(userId int) (string, error) {
 	return tokenString, nil
 }
 
-func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error){
+func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error) {
 	secretKey := []byte(os.Getenv("AUTH_SECRET_KEY"))
 	claims := &domains.Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
