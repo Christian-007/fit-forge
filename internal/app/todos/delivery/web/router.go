@@ -1,21 +1,36 @@
 package web
 
 import (
-	"github.com/Christian-007/fit-forge/internal/app/todos/repositories"
-	"github.com/Christian-007/fit-forge/internal/app/todos/services"
+	authservices "github.com/Christian-007/fit-forge/internal/app/auth/services"
+	todorepositories "github.com/Christian-007/fit-forge/internal/app/todos/repositories"
+	todoservices "github.com/Christian-007/fit-forge/internal/app/todos/services"
+	userrepositories "github.com/Christian-007/fit-forge/internal/app/users/repositories"
+	userservices "github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
+	"github.com/Christian-007/fit-forge/internal/pkg/middlewares"
 	"github.com/go-chi/chi/v5"
 )
 
 func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	r := chi.NewRouter()
-	todoRepository := repositories.NewTodoRepositoryPg(appCtx.Pool)
+	todoRepository := todorepositories.NewTodoRepositoryPg(appCtx.Pool)
 	todoHandler := NewTodoHandler(TodoHandlerOptions{
-		TodoService: services.NewTodoService(services.TodoServiceOptions{
+		TodoService: todoservices.NewTodoService(todoservices.TodoServiceOptions{
 			TodoRepository: todoRepository,
 		}),
 		Logger: appCtx.Logger,
 	})
+
+	userRepositoryPg := userrepositories.NewUserRepositoryPg(appCtx.Pool)
+	userService := userservices.NewUserService(userservices.UserServiceOptions{
+		UserRepository: userRepositoryPg,
+	})
+	authService := authservices.NewAuthService(authservices.AuthServiceOptions{
+		UserService: userService,
+	})
+
+	authenticate := middlewares.NewAuthenticate(authService)
+	r.Use(authenticate)
 
 	r.Get("/all", todoHandler.GetAll)
 	r.Get("/", todoHandler.GetAllByUserId)

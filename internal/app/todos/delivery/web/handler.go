@@ -10,6 +10,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/todos/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
+	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
@@ -43,21 +44,8 @@ func (t TodoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t TodoHandler) GetAllByUserId(w http.ResponseWriter, r *http.Request) {
-	userId := r.Header.Get("userId")
-	if userId == "" {
-		t.Logger.Error("User ID is empty")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is required"})
-		return
-	}
-
-	userIdInt, err := strconv.Atoi(userId)
-	if err != nil {
-		t.Logger.Error("User ID " + userId + " is invalid")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is invalid"})
-		return
-	}
-
-	todoResponse, err := t.TodoService.GetAllByUserId(userIdInt)
+	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	todoResponse, err := t.TodoService.GetAllByUserId(userId)
 	if err != nil {
 		t.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
@@ -78,21 +66,8 @@ func (t TodoHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := r.Header.Get("userId")
-	if userId == "" {
-		t.Logger.Error("User ID is empty")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is required"})
-		return
-	}
-
-	userIdInt, err := strconv.Atoi(userId)
-	if err != nil {
-		t.Logger.Error("User ID " + userId + " is invalid")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is invalid"})
-		return
-	}
-
-	todoResponse, err := t.TodoService.GetOneByUserId(userIdInt, todoId)
+	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	todoResponse, err := t.TodoService.GetOneByUserId(userId, todoId)
 	if err != nil {
 		t.Logger.Error(err.Error())
 
@@ -109,22 +84,8 @@ func (t TodoHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
-	userId := r.Header.Get("userId")
-	if userId == "" {
-		t.Logger.Error("User ID is empty")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is required"})
-		return
-	}
-
-	userIdInt, err := strconv.Atoi(userId)
-	if err != nil {
-		t.Logger.Error("User ID " + userId + " is invalid")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is invalid"})
-		return
-	}
-
 	var createTodoRequest dto.CreateTodoRequest
-	err = json.NewDecoder(r.Body).Decode(&createTodoRequest)
+	err := json.NewDecoder(r.Body).Decode(&createTodoRequest)
 	if err != nil {
 		t.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
@@ -137,7 +98,8 @@ func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todoResponse, err := t.TodoService.Create(userIdInt, createTodoRequest)
+	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	todoResponse, err := t.TodoService.Create(userId, createTodoRequest)
 	if err != nil {
 		t.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
@@ -155,21 +117,8 @@ func (t TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := r.Header.Get("userId")
-	if userId == "" {
-		t.Logger.Error("User ID is empty")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is required"})
-		return
-	}
-
-	userIdInt, err := strconv.Atoi(userId)
-	if err != nil {
-		t.Logger.Error("User ID " + userId + " is invalid")
-		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "User ID is invalid"})
-		return
-	}
-
-	err = t.TodoService.Delete(todoId, userIdInt)
+	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	err = t.TodoService.Delete(todoId, userId)
 	if err != nil {
 		if err == apperrors.ErrUserOrTodoNotFound {
 			t.Logger.Error(err.Error())
