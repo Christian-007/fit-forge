@@ -9,8 +9,10 @@ import (
 
 	"github.com/Christian-007/fit-forge/internal/db"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
+	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -35,10 +37,22 @@ func main() {
 	}
 	defer pool.Close()
 
+	// Open Redis Connection
+	client, err := cache.NewRedisCache(&redis.Options{
+		Addr:     os.Getenv("REDIS_DSN"),
+		Password: "",
+		DB:       0,
+	})
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	// Instantiate the all application dependencies
 	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
-		Logger: logger,
-		Pool:   pool,
+		Logger:      logger,
+		Pool:        pool,
+		RedisClient: client,
 	})
 
 	// HTTP Server configurations (Non TLS)

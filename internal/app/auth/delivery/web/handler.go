@@ -61,5 +61,12 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendResponse(w, http.StatusOK, dto.LoginResponse{AccessToken: token})
+	err = a.AuthService.SaveToken(userResponse.Id, token)
+	if err != nil {
+		a.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	utils.SendResponse(w, http.StatusOK, dto.LoginResponse{AccessToken: token.AccessToken})
 }

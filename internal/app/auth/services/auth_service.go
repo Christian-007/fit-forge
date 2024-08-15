@@ -9,7 +9,9 @@ import (
 	userdto "github.com/Christian-007/fit-forge/internal/app/users/dto"
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
+	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/twinj/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,6 +21,7 @@ type AuthService struct {
 
 type AuthServiceOptions struct {
 	UserService services.UserService
+	Cache       cache.Cache
 }
 
 func NewAuthService(options AuthServiceOptions) AuthService {
@@ -46,12 +49,14 @@ func (a AuthService) Authenticate(loginRequest authdto.LoginRequest) (userdto.Us
 	return response, nil
 }
 
-func (a AuthService) CreateToken(userId int) (string, error) {
+func (a AuthService) CreateToken(userId int) (domains.AuthToken, error) {
+	authToken := domains.AuthToken{}
 	secretKey := []byte(os.Getenv("AUTH_SECRET_KEY"))
+	expiresAt := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 	claims := domains.Claims{
 		UserID: userId,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: expiresAt,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -59,10 +64,14 @@ func (a AuthService) CreateToken(userId int) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(secretKey)
 	if err != nil {
-		return "", err
+		return domains.AuthToken{}, err
 	}
 
-	return tokenString, nil
+	authToken.AccessToken = tokenString
+	authToken.AccessTokenUuid = uuid.NewV4().String()
+	authToken.AccessTokenExpiresAt = expiresAt
+
+	return authToken, nil
 }
 
 func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error) {
@@ -83,4 +92,14 @@ func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error) 
 	}
 
 	return claims, nil
+}
+
+func (a AuthService) SaveToken(userId int, authToken domains.AuthToken) error {
+	accessTokenExpiration := time.Until(authToken.AccessTokenExpiresAt.Time)
+	err := a.Cache.Set(authToken.AccessTokenUuid, userId, accessTokenExpiration)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
