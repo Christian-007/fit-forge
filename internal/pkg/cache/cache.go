@@ -42,3 +42,7 @@ func (r *RedisCache) Get(key string) (any, error) {
 func (r *RedisCache) Set(key string, value any, expiration time.Duration) error {
 	return r.client.Set(r.ctx, key, value, expiration).Err()
 }
+
+func (r *RedisCache) Delete(key string) error {
+	return r.client.Del(r.ctx, key).Err()
+}
