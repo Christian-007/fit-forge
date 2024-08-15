@@ -51,10 +51,12 @@ func (a AuthService) Authenticate(loginRequest authdto.LoginRequest) (userdto.Us
 
 func (a AuthService) CreateToken(userId int) (domains.AuthToken, error) {
 	authToken := domains.AuthToken{}
+	uuid := uuid.NewV4().String()
 	secretKey := []byte(os.Getenv("AUTH_SECRET_KEY"))
 	expiresAt := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 	claims := domains.Claims{
 		UserID: userId,
+		Uuid: uuid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: expiresAt,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -68,7 +70,7 @@ func (a AuthService) CreateToken(userId int) (domains.AuthToken, error) {
 	}
 
 	authToken.AccessToken = tokenString
-	authToken.AccessTokenUuid = uuid.NewV4().String()
+	authToken.AccessTokenUuid = uuid
 	authToken.AccessTokenExpiresAt = expiresAt
 
 	return authToken, nil
