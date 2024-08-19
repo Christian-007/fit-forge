@@ -11,4 +11,5 @@ var (
 	ErrInvalidToken       = errors.New("invalid token")
 
 	ErrRedisKeyNotFound = errors.New("key does not exist in Redis")
+	ErrTypeAssertion    = errors.New("type assertion failed")
 )

@@ -1,7 +1,7 @@
 package web
 
 import (
-	authservice "github.com/Christian-007/fit-forge/internal/app/auth/services"
+	authservices "github.com/Christian-007/fit-forge/internal/app/auth/services"
 	userrepositories "github.com/Christian-007/fit-forge/internal/app/users/repositories"
 	userservices "github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
@@ -15,9 +15,9 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		UserRepository: userRepositoryPg,
 	})
 
-	authService := authservice.NewAuthService(authservice.AuthServiceOptions{
+	authService := authservices.NewAuthService(authservices.AuthServiceOptions{
 		UserService: userService,
-		Cache: appCtx.RedisClient,
+		Cache:       appCtx.RedisClient,
 	})
 
 	authHandler := NewAuthHandler(AuthHandlerOptions{

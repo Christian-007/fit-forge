@@ -27,6 +27,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	})
 	authService := authservices.NewAuthService(authservices.AuthServiceOptions{
 		UserService: userService,
+		Cache:       appCtx.RedisClient,
 	})
 
 	authenticate := middlewares.NewAuthenticate(authService)

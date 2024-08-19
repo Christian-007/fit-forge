@@ -66,7 +66,13 @@ func (t TodoHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	userId, ok := r.Context().Value(requestctx.UserContextKey).(int)
+	if !ok {
+		t.Logger.Error(apperrors.ErrTypeAssertion.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
 	todoResponse, err := t.TodoService.GetOneByUserId(userId, todoId)
 	if err != nil {
 		t.Logger.Error(err.Error())

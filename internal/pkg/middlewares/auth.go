@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Christian-007/fit-forge/internal/app/auth/services"
+	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
 	"github.com/Christian-007/fit-forge/internal/utils"
@@ -33,7 +34,18 @@ func NewAuthenticate(authService services.AuthService) func(http.Handler) http.H
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), requestctx.UserContextKey, claims.UserID)
+			// It's important to use `userId` from the cache just in case the JWT has been tampered
+			userId, err := authService.GetAuthDataFromCache(claims.Uuid)
+			if err != nil {
+				if err == apperrors.ErrRedisKeyNotFound {
+					utils.SendResponse(w, http.StatusForbidden, apphttp.ErrorResponse{Message: "Forbidden"})
+					return
+				}
+
+				utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+			}
+
+			ctx := context.WithValue(r.Context(), requestctx.UserContextKey, userId)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

@@ -2,6 +2,7 @@ package services
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/Christian-007/fit-forge/internal/app/auth/domains"
@@ -56,7 +57,7 @@ func (a AuthService) CreateToken(userId int) (domains.AuthToken, error) {
 	expiresAt := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 	claims := domains.Claims{
 		UserID: userId,
-		Uuid: uuid,
+		Uuid:   uuid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: expiresAt,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -104,4 +105,23 @@ func (a AuthService) SaveToken(userId int, authToken domains.AuthToken) error {
 	}
 
 	return nil
+}
+
+func (a AuthService) GetAuthDataFromCache(accessTokenUuid string) (int, error) {
+	value, err := a.Cache.Get(accessTokenUuid)
+	if err != nil {
+		return -1, err
+	}
+
+	stringUserId, ok := value.(string)
+	if !ok {
+		return -1, apperrors.ErrTypeAssertion
+	}
+
+	userId, err := strconv.Atoi(stringUserId)
+	if err != nil {
+		return -1, err
+	}
+
+	return userId, nil
 }
