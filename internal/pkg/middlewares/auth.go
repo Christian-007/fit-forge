@@ -43,6 +43,7 @@ func NewAuthenticate(authService services.AuthService) func(http.Handler) http.H
 				}
 
 				utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+				return
 			}
 
 			ctx := context.WithValue(r.Context(), requestctx.UserContextKey, userId)
