@@ -9,6 +9,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/auth/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
+	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
@@ -69,4 +70,22 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendResponse(w, http.StatusOK, dto.LoginResponse{AccessToken: token.AccessToken})
+}
+
+func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	accessTokenUuid, ok := r.Context().Value(requestctx.AccessTokenUuidContextKey).(string)
+	if !ok {
+		a.Logger.Error(apperrors.ErrTypeAssertion.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	err := a.AuthService.InvalidateToken(accessTokenUuid)
+	if err != nil {
+		a.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

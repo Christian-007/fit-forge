@@ -97,6 +97,15 @@ func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error) 
 	return claims, nil
 }
 
+func (a AuthService) InvalidateToken(accessTokenUuid string) (error) {
+	err := a.Cache.Delete(accessTokenUuid)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (a AuthService) SaveToken(userId int, authToken domains.AuthToken) error {
 	accessTokenExpiration := time.Until(authToken.AccessTokenExpiresAt.Time)
 	err := a.Cache.Set(authToken.AccessTokenUuid, userId, accessTokenExpiration)

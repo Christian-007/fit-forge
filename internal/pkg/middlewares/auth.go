@@ -47,6 +47,7 @@ func NewAuthenticate(authService services.AuthService) func(http.Handler) http.H
 			}
 
 			ctx := context.WithValue(r.Context(), requestctx.UserContextKey, userId)
+			ctx = context.WithValue(ctx, requestctx.AccessTokenUuidContextKey, claims.Uuid)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
