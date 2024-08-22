@@ -97,7 +97,7 @@ func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error) 
 	return claims, nil
 }
 
-func (a AuthService) InvalidateToken(accessTokenUuid string) (error) {
+func (a AuthService) InvalidateToken(accessTokenUuid string) error {
 	err := a.Cache.Delete(accessTokenUuid)
 	if err != nil {
 		return err
