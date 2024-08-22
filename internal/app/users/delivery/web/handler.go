@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
+	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
@@ -19,7 +19,7 @@ type UserHandler struct {
 
 type UserHandlerOptions struct {
 	UserService services.UserService
-	Logger      *slog.Logger
+	Logger      applog.Logger
 }
 
 func NewUserHandler(options UserHandlerOptions) UserHandler {

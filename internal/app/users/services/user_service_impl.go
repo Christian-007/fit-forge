@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
+type UserServiceImpl struct {
 	UserServiceOptions
 }
 
@@ -19,13 +19,13 @@ type UserServiceOptions struct {
 	UserRepository repositories.UserRepository
 }
 
-func NewUserService(options UserServiceOptions) UserService {
-	return UserService{
+func NewUserService(options UserServiceOptions) UserServiceImpl {
+	return UserServiceImpl{
 		options,
 	}
 }
 
-func (u UserService) GetAll() ([]dto.UserResponse, error) {
+func (u UserServiceImpl) GetAll() ([]dto.UserResponse, error) {
 	users, err := u.UserRepository.GetAll()
 	if err != nil {
 		return []dto.UserResponse{}, err
@@ -39,7 +39,7 @@ func (u UserService) GetAll() ([]dto.UserResponse, error) {
 	return userResponses, nil
 }
 
-func (u UserService) GetOne(id int) (dto.UserResponse, error) {
+func (u UserServiceImpl) GetOne(id int) (dto.UserResponse, error) {
 	user, err := u.UserRepository.GetOne(id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -52,7 +52,7 @@ func (u UserService) GetOne(id int) (dto.UserResponse, error) {
 	return toUserResponse(user), nil
 }
 
-func (u UserService) GetOneByEmail(email string) (dto.GetUserByEmailResponse, error) {
+func (u UserServiceImpl) GetOneByEmail(email string) (dto.GetUserByEmailResponse, error) {
 	userModel, err := u.UserRepository.GetOneByEmail(email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -71,7 +71,7 @@ func (u UserService) GetOneByEmail(email string) (dto.GetUserByEmailResponse, er
 	return response, nil
 }
 
-func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserResponse, error) {
+func (u UserServiceImpl) Create(createUserRequest dto.CreateUserRequest) (dto.UserResponse, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createUserRequest.Password), 12)
 	if err != nil {
 		return dto.UserResponse{}, err
@@ -91,7 +91,7 @@ func (u UserService) Create(createUserRequest dto.CreateUserRequest) (dto.UserRe
 	return toUserResponse(createdUser), nil
 }
 
-func (u UserService) Delete(id int) error {
+func (u UserServiceImpl) Delete(id int) error {
 	err := u.UserRepository.Delete(id)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (u UserService) Delete(id int) error {
 	return nil
 }
 
-func (u UserService) UpdateOne(id int, updateUserRequest dto.UpdateUserRequest) (dto.UserResponse, error) {
+func (u UserServiceImpl) UpdateOne(id int, updateUserRequest dto.UpdateUserRequest) (dto.UserResponse, error) {
 	userModel, err := toUserModel(updateUserRequest)
 	if err != nil {
 		return dto.UserResponse{}, err
