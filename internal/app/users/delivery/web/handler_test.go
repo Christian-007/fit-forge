@@ -1,6 +1,7 @@
 package web_test
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,6 +9,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/users/delivery/web"
 	"github.com/Christian-007/fit-forge/internal/app/users/dto"
 	mock_services "github.com/Christian-007/fit-forge/internal/app/users/services/mocks"
+	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	mock_applog "github.com/Christian-007/fit-forge/internal/pkg/applog/mocks"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -59,15 +61,11 @@ var _ = Describe("User Handler", func() {
 				mockLogger.EXPECT().Error(gomock.Any()).Times(0)
 				Expect(recorder.Code).To(Equal(http.StatusOK))
 
-				actual := recorder.Body.Bytes()
-				expected := `
-					{
-						"results":[
-							{"id":1,"name":"John Doe","email":"johndoe@gmail.com"},
-							{"id":2,"name":"Mark","email":"mark@gmail.com"}
-						]
-					}`
-				Expect(actual).To(MatchJSON(expected))
+				expected := apphttp.CollectionRes[dto.UserResponse]{Results: mockGetAllUsersResponse}
+				var result apphttp.CollectionRes[dto.UserResponse]
+				err := json.NewDecoder(recorder.Body).Decode(&result)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result).To(Equal(expected))
 			})
 		})
 	})
