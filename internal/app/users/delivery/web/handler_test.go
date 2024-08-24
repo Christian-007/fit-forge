@@ -2,6 +2,7 @@ package web_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -52,6 +53,7 @@ var _ = Describe("User Handler", func() {
 			Name:  "Mark",
 			Email: "mark@gmail.com",
 		}}
+
 		When("there is no error from UserService", func() {
 			It("should return 200 with a list of users", func() {
 				mockUserService.EXPECT().GetAll().Return(mockGetAllUsersResponse, nil)
@@ -63,6 +65,25 @@ var _ = Describe("User Handler", func() {
 
 				expected := apphttp.CollectionRes[dto.UserResponse]{Results: mockGetAllUsersResponse}
 				var result apphttp.CollectionRes[dto.UserResponse]
+				err := json.NewDecoder(recorder.Body).Decode(&result)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result).To(Equal(expected))
+			})
+		})
+
+		When("there is an error from UserService", func() {
+			It("should return 500 with an error message", func() {
+				mockError := errors.New("database connection failed")
+
+				mockUserService.EXPECT().GetAll().Return([]dto.UserResponse{}, mockError)
+				mockLogger.EXPECT().Error(mockError.Error())
+
+				userHandler.GetAll(recorder, request)
+
+				Expect(recorder.Code).To(Equal(http.StatusInternalServerError))
+
+				expected := apphttp.ErrorResponse{Message: "Internal Server Error"}
+				var result apphttp.ErrorResponse
 				err := json.NewDecoder(recorder.Body).Decode(&result)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(result).To(Equal(expected))
