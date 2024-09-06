@@ -10,8 +10,8 @@ import (
 	"github.com/Christian-007/fit-forge/internal/db"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
+	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 
-	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -23,14 +23,15 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	// Load `.env` file
-	err := godotenv.Load()
+	envVariableService := envvariable.GodotEnvVariableService{}
+	err := envVariableService.Load()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
 	// Open DB connection
-	pool, err := db.OpenPostgresDbPool(os.Getenv("POSTGRES_URL"))
+	pool, err := db.OpenPostgresDbPool(envVariableService.Get("POSTGRES_URL"))
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -39,7 +40,7 @@ func main() {
 
 	// Open Redis Connection
 	client, err := cache.NewRedisCache(&redis.Options{
-		Addr:     os.Getenv("REDIS_DSN"),
+		Addr:     envVariableService.Get("REDIS_DSN"),
 		Password: "",
 		DB:       0,
 	})
@@ -50,9 +51,10 @@ func main() {
 
 	// Instantiate the all application dependencies
 	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
-		Logger:      logger,
-		Pool:        pool,
-		RedisClient: client,
+		Logger:             logger,
+		Pool:               pool,
+		RedisClient:        client,
+		EnvVariableService: envVariableService,
 	})
 
 	// HTTP Server configurations (Non TLS)
