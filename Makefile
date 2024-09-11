@@ -19,10 +19,13 @@ create_db: validate_env
 drop_db:
 	docker exec -it postgres12 dropdb fit_forge
 
-migrate_up: validate_env
+migrate_up_all: validate_env
 	migrate -path migrations -database "postgresql://${DB_USER}:${POSTGRES_PASSWORD}@localhost:5433/fit_forge?sslmode=disable" -verbose up
 
-migrate_down: validate_env
+migrate_down_all: validate_env
 	migrate -path migrations -database "postgresql://${DB_USER}:${POSTGRES_PASSWORD}@localhost:5433/fit_forge?sslmode=disable" -verbose down
 
-.PHONY: run_db_container start_db stop_db create_db drop_db migrate_up migrate_down 
+migrate_down_1: validate_env
+	migrate -path migrations -database "postgresql://${DB_USER}:${POSTGRES_PASSWORD}@localhost:5433/fit_forge?sslmode=disable" -verbose down 1
+
+.PHONY: run_db_container start_db stop_db create_db drop_db migrate_up_all migrate_down_all migrate_down_1
