@@ -21,8 +21,8 @@ type AuthService struct {
 }
 
 type AuthServiceOptions struct {
-	UserService services.UserService
-	Cache       cache.Cache
+	UserService        services.UserService
+	Cache              cache.Cache
 	EnvVariableService envvariable.EnvVariableService
 }
 
