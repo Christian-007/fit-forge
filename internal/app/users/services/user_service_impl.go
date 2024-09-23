@@ -8,6 +8,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/users/repositories"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -52,6 +53,7 @@ func (u UserServiceImpl) GetOne(id int) (dto.UserResponse, error) {
 	return toUserResponse(user), nil
 }
 
+// Avoid calling this method for Front end side as there is `password` value
 func (u UserServiceImpl) GetOneByEmail(email string) (dto.GetUserByEmailResponse, error) {
 	userModel, err := u.UserRepository.GetOneByEmail(email)
 	if err != nil {
@@ -66,6 +68,7 @@ func (u UserServiceImpl) GetOneByEmail(email string) (dto.GetUserByEmailResponse
 		Id:       userModel.Id,
 		Name:     userModel.Name,
 		Email:    userModel.Email,
+		Role:     userModel.Role,
 		Password: userModel.Password,
 	}
 	return response, nil
@@ -84,11 +87,21 @@ func (u UserServiceImpl) Create(createUserRequest dto.CreateUserRequest) (dto.Us
 	}
 
 	createdUser, err := u.UserRepository.Create(userModel)
-	if err != nil {
-		return dto.UserResponse{}, err
+	if err == nil {
+		return toUserResponse(createdUser), nil
 	}
 
-	return toUserResponse(createdUser), nil
+	pgxErr, ok := err.(*pgconn.PgError)
+	if !ok || pgxErr.Code != "23505" {
+		return dto.UserResponse{}, err // default error
+	}
+
+	// Unique constraint violation ("23505") errors
+	if pgxErr.ConstraintName == "users_email_key" {
+		return dto.UserResponse{}, apperrors.ErrEmailDuplicate
+	}
+
+	return dto.UserResponse{}, err // default error
 }
 
 func (u UserServiceImpl) Delete(id int) error {
@@ -146,5 +159,6 @@ func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 		Id:    userModel.Id,
 		Name:  userModel.Name,
 		Email: userModel.Email,
+		Role:  userModel.Role,
 	}
 }

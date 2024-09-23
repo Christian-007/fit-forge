@@ -9,6 +9,7 @@ var (
 	ErrInvalidCredentials = errors.New("invalid username or password")
 	ErrInvalidSignature   = errors.New("invalid token signature")
 	ErrInvalidToken       = errors.New("invalid token")
+	ErrEmailDuplicate     = errors.New("email is duplicated")
 
 	ErrRedisKeyNotFound = errors.New("key does not exist in Redis")
 	ErrTypeAssertion    = errors.New("type assertion failed")

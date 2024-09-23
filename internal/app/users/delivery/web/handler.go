@@ -82,6 +82,12 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userResponse, err := u.UserService.Create(createUserRequest)
 	if err != nil {
 		u.Logger.Error(err.Error())
+
+		if err == apperrors.ErrEmailDuplicate {
+			utils.SendResponse(w, http.StatusConflict, apphttp.ErrorResponse{Message: "Email has already been registered"})
+			return
+		}
+
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}

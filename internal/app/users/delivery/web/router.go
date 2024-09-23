@@ -24,15 +24,21 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Cache:              appCtx.RedisClient,
 		EnvVariableService: appCtx.EnvVariableService,
 	})
-
 	authenticate := middlewares.NewAuthenticate(authService)
-	r.Use(authenticate)
 
-	r.Get("/", userHandler.GetAll)
-	r.Get("/{id}", userHandler.GetOne)
-	r.Post("/", userHandler.Create)
-	r.Delete("/{id}", userHandler.Delete)
-	r.Patch("/{id}", userHandler.UpdateOne)
+	// Public routes
+	r.Group(func(r chi.Router) {
+		r.Post("/", userHandler.Create)
+	})
+
+	// Private routes
+	r.Group(func(r chi.Router) {
+		r.Use(authenticate)
+		r.Get("/", userHandler.GetAll)
+		r.Get("/{id}", userHandler.GetOne)
+		r.Delete("/{id}", userHandler.Delete)
+		r.Patch("/{id}", userHandler.UpdateOne)
+	})
 
 	return r
 }

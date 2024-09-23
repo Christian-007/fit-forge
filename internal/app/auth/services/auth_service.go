@@ -47,6 +47,7 @@ func (a AuthService) Authenticate(loginRequest authdto.LoginRequest) (userdto.Us
 		Id:    user.Id,
 		Name:  user.Name,
 		Email: user.Email,
+		Role:  user.Role,
 	}
 	return response, nil
 }

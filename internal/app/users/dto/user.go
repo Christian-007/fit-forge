@@ -9,12 +9,14 @@ type UserResponse struct {
 	Id    int    `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
+	Role  int    `json:"role"`
 }
 
 type GetUserByEmailResponse struct {
 	Id       int    `json:"id"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
+	Role     int    `json:"role"`
 	Password []byte `json:"password"`
 }
 
