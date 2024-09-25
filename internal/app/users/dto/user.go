@@ -38,6 +38,7 @@ type UpdateUserRequest struct {
 	Name     *string `json:"name"`
 	Email    *string `json:"email"`
 	Password *string `json:"password"`
+	Role     *int    `json:"role"`
 }
 
 // As of 28 May '24 does not support an empty string update
@@ -45,5 +46,6 @@ func (u UpdateUserRequest) Validate() error {
 	return validation.ValidateStruct(&u,
 		validation.Field(&u.Name, validation.NilOrNotEmpty, validation.Length(2, 200)),
 		validation.Field(&u.Email, validation.NilOrNotEmpty, is.Email),
+		validation.Field(&u.Role, validation.NilOrNotEmpty, validation.In(1, 2)),
 	)
 }

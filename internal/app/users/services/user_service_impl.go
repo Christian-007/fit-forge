@@ -151,6 +151,10 @@ func toUserModel(updateUserRequest dto.UpdateUserRequest) (domains.UserModel, er
 		userModel.Password = hashedPassword
 	}
 
+	if updateUserRequest.Role != nil {
+		userModel.Role = *updateUserRequest.Role
+	}
+
 	return userModel, nil
 }
 

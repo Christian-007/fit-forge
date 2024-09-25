@@ -105,9 +105,9 @@ func (u UserRepositoryPg) UpdateOne(id int, updateUser domains.UserModel) (domai
 	args := createUpdateUserPgxArgs(id, updateUser)
 	query := `
 		UPDATE users 
-		SET name = COALESCE(@name, name), email = COALESCE(@email, email), password = COALESCE(@password, password) 
+		SET name = COALESCE(@name, name), email = COALESCE(@email, email), password = COALESCE(@password, password), role = COALESCE(@role, role)
 		WHERE id = @id
-		RETURNING id, name, email, password, created_at
+		RETURNING id, name, email, password, role, created_at
 	`
 
 	var user domains.UserModel
@@ -116,6 +116,7 @@ func (u UserRepositoryPg) UpdateOne(id int, updateUser domains.UserModel) (domai
 		&user.Name,
 		&user.Email,
 		&user.Password,
+		&user.Role,
 		&user.CreatedAt,
 	)
 	if err != nil {
@@ -138,6 +139,9 @@ func createUpdateUserPgxArgs(id int, updateUser domains.UserModel) pgx.NamedArgs
 	}
 	if len(updateUser.Password) > 0 {
 		result["password"] = updateUser.Password
+	}
+	if updateUser.Role != 0 {
+		result["role"] = updateUser.Role
 	}
 
 	return result
