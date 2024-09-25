@@ -14,4 +14,4 @@ CREATE TABLE "todos" (
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-ALTER TABLE "todos" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "todos" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE;
