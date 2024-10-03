@@ -46,3 +46,20 @@ func (r *RedisCache) Set(key string, value any, expiration time.Duration) error 
 func (r *RedisCache) Delete(key string) error {
 	return r.client.Del(r.ctx, key).Err()
 }
+
+func (r *RedisCache) GetAllHashFields(key string) (map[string]string, error) {
+	result, err := r.client.HGetAll(r.ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (r *RedisCache) SetHash(key string, values ...interface{}) error {
+	return r.client.HSet(r.ctx, key, values).Err()
+}
+
+func (r *RedisCache) SetExpire(key string, expiration time.Duration) error {
+	return r.client.Expire(r.ctx, key, expiration).Err()
+}

@@ -108,9 +108,14 @@ func (a AuthService) InvalidateToken(accessTokenUuid string) error {
 	return nil
 }
 
-func (a AuthService) SaveToken(userId int, authToken domains.AuthToken) error {
+func (a AuthService) SaveToken(userResponse userdto.UserResponse, authToken domains.AuthToken) error {
 	accessTokenExpiration := time.Until(authToken.AccessTokenExpiresAt.Time)
-	err := a.Cache.Set(authToken.AccessTokenUuid, userId, accessTokenExpiration)
+	err := a.Cache.SetHash(authToken.AccessTokenUuid, "userId", userResponse.Id, "role", userResponse.Role)
+	if err != nil {
+		return err
+	}
+
+	err = a.Cache.SetExpire(authToken.AccessTokenUuid, accessTokenExpiration)
 	if err != nil {
 		return err
 	}
