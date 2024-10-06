@@ -11,6 +11,7 @@ var (
 	ErrInvalidToken       = errors.New("invalid token")
 	ErrEmailDuplicate     = errors.New("email is duplicated")
 
-	ErrRedisKeyNotFound = errors.New("key does not exist in Redis")
-	ErrTypeAssertion    = errors.New("type assertion failed")
+	ErrRedisKeyNotFound    = errors.New("key does not exist in Redis")
+	ErrRedisValueNotInHash = errors.New("value is not in Redis Hash")
+	ErrTypeAssertion       = errors.New("type assertion failed")
 )

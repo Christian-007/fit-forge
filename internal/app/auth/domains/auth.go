@@ -13,3 +13,8 @@ type AuthToken struct {
 	AccessTokenUuid      string
 	AccessTokenExpiresAt *jwt.NumericDate
 }
+
+type AuthData struct {
+	UserId int `json:"userId"`
+	Role   int `json:"role"`
+}

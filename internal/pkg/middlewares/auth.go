@@ -35,10 +35,10 @@ func NewAuthenticate(authService services.AuthService) func(http.Handler) http.H
 			}
 
 			// It's important to use `userId` from the cache just in case the JWT has been tampered
-			userId, err := authService.GetAuthDataFromCache(claims.Uuid)
+			authData, err := authService.GetHashAuthDataFromCache(claims.Uuid)
 			if err != nil {
-				if err == apperrors.ErrRedisKeyNotFound {
-					utils.SendResponse(w, http.StatusForbidden, apphttp.ErrorResponse{Message: "Forbidden"})
+				if err == apperrors.ErrRedisKeyNotFound || err == apperrors.ErrRedisValueNotInHash {
+					utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Unauthorized"})
 					return
 				}
 
@@ -46,8 +46,9 @@ func NewAuthenticate(authService services.AuthService) func(http.Handler) http.H
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), requestctx.UserContextKey, userId)
+			ctx := context.WithValue(r.Context(), requestctx.UserContextKey, authData.UserId)
 			ctx = context.WithValue(ctx, requestctx.AccessTokenUuidContextKey, claims.Uuid)
+			ctx = context.WithValue(ctx, requestctx.UserRoleContextKey, authData.Role)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

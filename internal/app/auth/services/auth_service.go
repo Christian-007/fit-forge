@@ -123,6 +123,34 @@ func (a AuthService) SaveToken(userResponse userdto.UserResponse, authToken doma
 	return nil
 }
 
+func (a AuthService) GetHashAuthDataFromCache(accessTokenUuid string) (domains.AuthData, error) {
+	result, err := a.Cache.GetAllHashFields(accessTokenUuid)
+	if err != nil {
+		if len(result) == 0 {
+			return domains.AuthData{}, apperrors.ErrRedisValueNotInHash
+		}
+
+		return domains.AuthData{}, err
+	}
+
+	userIdInt, err := strconv.Atoi(result["userId"])
+	if err != nil {
+		return domains.AuthData{}, err
+	}
+
+	roleInt, err := strconv.Atoi(result["role"])
+	if err != nil {
+		return domains.AuthData{}, err
+	}
+
+	return domains.AuthData{
+		UserId: userIdInt,
+		Role:   roleInt,
+	}, nil
+}
+
+// (Obsolete) Get auth data from Cache with a single value.
+// Use `.GetHashAuthDataFromCache(accessTokenUuid string)` instead.
 func (a AuthService) GetAuthDataFromCache(accessTokenUuid string) (int, error) {
 	value, err := a.Cache.Get(accessTokenUuid)
 	if err != nil {
