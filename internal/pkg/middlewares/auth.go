@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
@@ -46,9 +45,9 @@ func NewAuthenticate(authService services.AuthService) func(http.Handler) http.H
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), requestctx.UserContextKey, authData.UserId)
-			ctx = context.WithValue(ctx, requestctx.AccessTokenUuidContextKey, claims.Uuid)
-			ctx = context.WithValue(ctx, requestctx.UserRoleContextKey, authData.Role)
+			ctx := requestctx.WithUserId(r.Context(), authData.UserId)
+			ctx = requestctx.WithAccessTokenUuid(ctx, claims.Uuid)
+			ctx = requestctx.WithRole(ctx, authData.Role)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

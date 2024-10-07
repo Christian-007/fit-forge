@@ -73,7 +73,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	accessTokenUuid, ok := r.Context().Value(requestctx.AccessTokenUuidContextKey).(string)
+	accessTokenUuid, ok := requestctx.AccessTokenUuid(r.Context())
 	if !ok {
 		a.Logger.Error(apperrors.ErrTypeAssertion.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})

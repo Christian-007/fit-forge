@@ -44,7 +44,13 @@ func (t TodoHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t TodoHandler) GetAllByUserId(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	userId, ok := requestctx.UserId(r.Context())
+	if !ok {
+		t.Logger.Error(apperrors.ErrTypeAssertion.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
 	todoResponse, err := t.TodoService.GetAllByUserId(userId)
 	if err != nil {
 		t.Logger.Error(err.Error())
@@ -66,7 +72,7 @@ func (t TodoHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId, ok := r.Context().Value(requestctx.UserContextKey).(int)
+	userId, ok := requestctx.UserId(r.Context())
 	if !ok {
 		t.Logger.Error(apperrors.ErrTypeAssertion.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
@@ -104,7 +110,13 @@ func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	userId, ok := requestctx.UserId(r.Context())
+	if !ok {
+		t.Logger.Error(apperrors.ErrTypeAssertion.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
 	todoResponse, err := t.TodoService.Create(userId, createTodoRequest)
 	if err != nil {
 		t.Logger.Error(err.Error())
@@ -123,7 +135,13 @@ func (t TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := r.Context().Value(requestctx.UserContextKey).(int)
+	userId, ok := requestctx.UserId(r.Context())
+	if !ok {
+		t.Logger.Error(apperrors.ErrTypeAssertion.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
 	err = t.TodoService.Delete(todoId, userId)
 	if err != nil {
 		if err == apperrors.ErrUserOrTodoNotFound {
