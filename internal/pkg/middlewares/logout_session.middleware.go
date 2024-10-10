@@ -42,6 +42,7 @@ func LogoutSession(authService services.AuthService) func (http.Handler) http.Ha
 				}
 	
 				utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+				return
 			}
 
 			ctx = requestctx.WithUserId(ctx, authData.UserId)
