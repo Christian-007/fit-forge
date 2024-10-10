@@ -31,8 +31,11 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		EnvVariableService: appCtx.EnvVariableService,
 	})
 
-	authenticate := middlewares.NewAuthenticate(authService)
-	r.Use(authenticate)
+	jwtAuthMiddleware := middlewares.JwtAuth(authService)
+	strictSessionMiddleware := middlewares.StrictSession(authService)
+	
+	r.Use(jwtAuthMiddleware)
+	r.Use(strictSessionMiddleware)
 
 	r.Get("/all", todoHandler.GetAll)
 	r.Get("/", todoHandler.GetAllByUserId)

@@ -21,7 +21,8 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Cache:              appCtx.RedisClient,
 		EnvVariableService: appCtx.EnvVariableService,
 	})
-	authMiddleware := middlewares.NewAuthenticate(authService)
+	jwtAuthMiddleware := middlewares.JwtAuth(authService)
+	strictSessionMiddleware := middlewares.StrictSession(authService)
 
 	authHandler := NewAuthHandler(AuthHandlerOptions{
 		AuthService: authService,
@@ -35,7 +36,9 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 
 	// Private routes
 	r.Group(func(r chi.Router) {
-		r.Use(authMiddleware)
+		r.Use(jwtAuthMiddleware)
+		r.Use(strictSessionMiddleware)
+		
 		r.Post("/logout", authHandler.Logout)
 	})
 
