@@ -1,11 +1,12 @@
 package middlewares
 
 import (
-	"log/slog"
 	"net/http"
+
+	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 )
 
-func NewLogRequest(logger *slog.Logger) func(http.Handler) http.Handler {
+func NewLogRequest(logger applog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var (

@@ -54,3 +54,20 @@ func (mr *MockLoggerMockRecorder) Error(msg any, ctx ...any) *gomock.Call {
 	varargs := append([]any{msg}, ctx...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Error", reflect.TypeOf((*MockLogger)(nil).Error), varargs...)
 }
+
+// Info mocks base method.
+func (m *MockLogger) Info(msg string, args ...any) {
+	m.ctrl.T.Helper()
+	varargs := []any{msg}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "Info", varargs...)
+}
+
+// Info indicates an expected call of Info.
+func (mr *MockLoggerMockRecorder) Info(msg any, args ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{msg}, args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockLogger)(nil).Info), varargs...)
+}
