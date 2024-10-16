@@ -10,8 +10,8 @@ import (
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
-func LogoutSession(authService services.AuthService) func (http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {	
+func LogoutSession(authService services.AuthService) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			accessTokenUuid, ok := requestctx.AccessTokenUuid(ctx)
@@ -30,7 +30,7 @@ func LogoutSession(authService services.AuthService) func (http.Handler) http.Ha
 						utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 						return
 					}
-					
+
 					ctx = requestctx.WithUserId(ctx, userId)
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
@@ -40,7 +40,7 @@ func LogoutSession(authService services.AuthService) func (http.Handler) http.Ha
 					utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Unauthorized"})
 					return
 				}
-	
+
 				utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 				return
 			}

@@ -36,7 +36,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(jwtAuthMiddleware)
 		r.Use(strictSessionMiddleware)
-		
+
 		r.Get("/", userHandler.GetAll)
 		r.Get("/{id}", userHandler.GetOne)
 		r.Delete("/{id}", userHandler.Delete)

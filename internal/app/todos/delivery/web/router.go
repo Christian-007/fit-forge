@@ -33,7 +33,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 
 	jwtAuthMiddleware := middlewares.JwtAuth(authService)
 	strictSessionMiddleware := middlewares.StrictSession(authService)
-	
+
 	r.Use(jwtAuthMiddleware)
 	r.Use(strictSessionMiddleware)
 

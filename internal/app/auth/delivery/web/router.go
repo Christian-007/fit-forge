@@ -38,7 +38,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(jwtAuthMiddleware)
 		r.Use(logoutSessionMiddleware)
-		
+
 		r.Post("/logout", authHandler.Logout)
 	})
 
