@@ -9,6 +9,7 @@ import (
 
 	"github.com/Christian-007/fit-forge/internal/db"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
+	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 
@@ -20,7 +21,8 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
 	// Initialize logger
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slogLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger := applog.NewSlogLogger(slogLogger)
 
 	// Load `.env` file
 	envVariableService := envvariable.GodotEnvVariableService{}
@@ -61,7 +63,7 @@ func main() {
 	server := &http.Server{
 		Addr:         *addr,
 		Handler:      Routes(appCtx),
-		ErrorLog:     slog.NewLogLogger(appCtx.Logger.Handler(), slog.LevelError),
+		ErrorLog:     logger.StandardLogger(applog.LevelError),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/todos/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
+	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
@@ -20,7 +20,7 @@ type TodoHandler struct {
 
 type TodoHandlerOptions struct {
 	TodoService services.TodoService
-	Logger      *slog.Logger
+	Logger      applog.Logger
 }
 
 func NewTodoHandler(options TodoHandlerOptions) TodoHandler {

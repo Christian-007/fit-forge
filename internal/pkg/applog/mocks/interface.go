@@ -10,8 +10,10 @@
 package mock_applog
 
 import (
+	log "log"
 	reflect "reflect"
 
+	applog "github.com/Christian-007/fit-forge/internal/pkg/applog"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -39,19 +41,19 @@ func (m *MockLogger) EXPECT() *MockLoggerMockRecorder {
 }
 
 // Error mocks base method.
-func (m *MockLogger) Error(msg string, ctx ...any) {
+func (m *MockLogger) Error(msg string, args ...any) {
 	m.ctrl.T.Helper()
 	varargs := []any{msg}
-	for _, a := range ctx {
+	for _, a := range args {
 		varargs = append(varargs, a)
 	}
 	m.ctrl.Call(m, "Error", varargs...)
 }
 
 // Error indicates an expected call of Error.
-func (mr *MockLoggerMockRecorder) Error(msg any, ctx ...any) *gomock.Call {
+func (mr *MockLoggerMockRecorder) Error(msg any, args ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{msg}, ctx...)
+	varargs := append([]any{msg}, args...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Error", reflect.TypeOf((*MockLogger)(nil).Error), varargs...)
 }
 
@@ -70,4 +72,18 @@ func (mr *MockLoggerMockRecorder) Info(msg any, args ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{msg}, args...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Info", reflect.TypeOf((*MockLogger)(nil).Info), varargs...)
+}
+
+// StandardLogger mocks base method.
+func (m *MockLogger) StandardLogger(level applog.Level) *log.Logger {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StandardLogger", level)
+	ret0, _ := ret[0].(*log.Logger)
+	return ret0
+}
+
+// StandardLogger indicates an expected call of StandardLogger.
+func (mr *MockLoggerMockRecorder) StandardLogger(level any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StandardLogger", reflect.TypeOf((*MockLogger)(nil).StandardLogger), level)
 }

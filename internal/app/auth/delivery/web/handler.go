@@ -2,13 +2,13 @@ package web
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 
 	"github.com/Christian-007/fit-forge/internal/app/auth/dto"
 	"github.com/Christian-007/fit-forge/internal/app/auth/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
+	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
@@ -19,7 +19,7 @@ type AuthHandler struct {
 
 type AuthHandlerOptions struct {
 	AuthService services.AuthService
-	Logger      *slog.Logger
+	Logger      applog.Logger
 }
 
 func NewAuthHandler(options AuthHandlerOptions) AuthHandler {
