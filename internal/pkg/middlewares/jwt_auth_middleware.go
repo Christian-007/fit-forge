@@ -10,7 +10,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
-func JwtAuth(authService services.AuthServiceImpl) func(http.Handler) http.Handler {
+func JwtAuth(authService services.AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header["Authorization"]

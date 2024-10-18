@@ -3,7 +3,6 @@ package middlewares_test
 import (
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	mock_applog "github.com/Christian-007/fit-forge/internal/pkg/applog/mocks"
 	"github.com/Christian-007/fit-forge/internal/pkg/middlewares"
@@ -60,8 +59,3 @@ var _ = Describe("Logger Middleware", func() {
 	})
 
 })
-
-func TestLoggerMiddleware(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "LoggerMiddleware Suite")
-}
