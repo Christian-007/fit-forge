@@ -16,7 +16,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		UserRepository: userRepositoryPg,
 	})
 
-	authService := authservices.NewAuthService(authservices.AuthServiceOptions{
+	authService := authservices.NewAuthServiceImpl(authservices.AuthServiceOptions{
 		UserService:        userService,
 		Cache:              appCtx.RedisClient,
 		EnvVariableService: appCtx.EnvVariableService,

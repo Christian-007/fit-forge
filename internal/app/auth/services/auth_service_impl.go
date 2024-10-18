@@ -16,7 +16,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthService struct {
+type AuthServiceImpl struct {
 	AuthServiceOptions
 }
 
@@ -26,13 +26,13 @@ type AuthServiceOptions struct {
 	EnvVariableService envvariable.EnvVariableService
 }
 
-func NewAuthService(options AuthServiceOptions) AuthService {
-	return AuthService{
+func NewAuthServiceImpl(options AuthServiceOptions) AuthServiceImpl {
+	return AuthServiceImpl{
 		options,
 	}
 }
 
-func (a AuthService) Authenticate(loginRequest authdto.LoginRequest) (userdto.UserResponse, error) {
+func (a AuthServiceImpl) Authenticate(loginRequest authdto.LoginRequest) (userdto.UserResponse, error) {
 	user, err := a.UserService.GetOneByEmail(loginRequest.Username)
 	if err != nil {
 		return userdto.UserResponse{}, err
@@ -52,7 +52,7 @@ func (a AuthService) Authenticate(loginRequest authdto.LoginRequest) (userdto.Us
 	return response, nil
 }
 
-func (a AuthService) CreateToken(userId int) (domains.AuthToken, error) {
+func (a AuthServiceImpl) CreateToken(userId int) (domains.AuthToken, error) {
 	authToken := domains.AuthToken{}
 	uuid := uuid.NewV4().String()
 	secretKey := []byte(a.EnvVariableService.Get("AUTH_SECRET_KEY"))
@@ -79,7 +79,7 @@ func (a AuthService) CreateToken(userId int) (domains.AuthToken, error) {
 	return authToken, nil
 }
 
-func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error) {
+func (a AuthServiceImpl) ValidateToken(tokenString string) (*domains.Claims, error) {
 	secretKey := []byte(a.EnvVariableService.Get("AUTH_SECRET_KEY"))
 	claims := &domains.Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
@@ -99,7 +99,7 @@ func (a AuthService) ValidateToken(tokenString string) (*domains.Claims, error) 
 	return claims, nil
 }
 
-func (a AuthService) InvalidateToken(accessTokenUuid string) error {
+func (a AuthServiceImpl) InvalidateToken(accessTokenUuid string) error {
 	err := a.Cache.Delete(accessTokenUuid)
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (a AuthService) InvalidateToken(accessTokenUuid string) error {
 	return nil
 }
 
-func (a AuthService) SaveToken(userResponse userdto.UserResponse, authToken domains.AuthToken) error {
+func (a AuthServiceImpl) SaveToken(userResponse userdto.UserResponse, authToken domains.AuthToken) error {
 	accessTokenExpiration := time.Until(authToken.AccessTokenExpiresAt.Time)
 	err := a.Cache.SetHash(authToken.AccessTokenUuid, "userId", userResponse.Id, "role", userResponse.Role)
 	if err != nil {
@@ -123,7 +123,7 @@ func (a AuthService) SaveToken(userResponse userdto.UserResponse, authToken doma
 	return nil
 }
 
-func (a AuthService) GetHashAuthDataFromCache(accessTokenUuid string) (domains.AuthData, error) {
+func (a AuthServiceImpl) GetHashAuthDataFromCache(accessTokenUuid string) (domains.AuthData, error) {
 	result, err := a.Cache.GetAllHashFields(accessTokenUuid)
 	if err != nil {
 		if len(result) == 0 {
@@ -151,7 +151,7 @@ func (a AuthService) GetHashAuthDataFromCache(accessTokenUuid string) (domains.A
 
 // (Obsolete) Get auth data from Cache with a single value.
 // Use `.GetHashAuthDataFromCache(accessTokenUuid string)` instead.
-func (a AuthService) GetAuthDataFromCache(accessTokenUuid string) (int, error) {
+func (a AuthServiceImpl) GetAuthDataFromCache(accessTokenUuid string) (int, error) {
 	value, err := a.Cache.Get(accessTokenUuid)
 	if err != nil {
 		return -1, err

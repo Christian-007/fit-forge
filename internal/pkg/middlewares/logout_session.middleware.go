@@ -10,7 +10,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
-func LogoutSession(authService services.AuthService) func(http.Handler) http.Handler {
+func LogoutSession(authService services.AuthServiceImpl) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

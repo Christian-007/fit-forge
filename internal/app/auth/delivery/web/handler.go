@@ -18,7 +18,7 @@ type AuthHandler struct {
 }
 
 type AuthHandlerOptions struct {
-	AuthService services.AuthService
+	AuthService services.AuthServiceImpl
 	Logger      applog.Logger
 }
 
