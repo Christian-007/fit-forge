@@ -2,7 +2,6 @@ package services_test
 
 import (
 	"errors"
-	"testing"
 	"time"
 
 	"github.com/Christian-007/fit-forge/internal/app/users/domains"
@@ -138,8 +137,3 @@ var _ = Describe("User Service", func() {
 		})
 	})
 })
-
-func TestUserService(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "UserService Suite")
-}

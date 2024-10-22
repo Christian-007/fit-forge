@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	"github.com/Christian-007/fit-forge/internal/app/users/delivery/web"
 	"github.com/Christian-007/fit-forge/internal/app/users/dto"
@@ -91,8 +90,3 @@ var _ = Describe("User Handler", func() {
 		})
 	})
 })
-
-func TestUserHandler(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "UserHandler Suite")
-}
