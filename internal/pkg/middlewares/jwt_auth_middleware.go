@@ -28,7 +28,7 @@ func JwtAuth(authService services.AuthService) func(http.Handler) http.Handler {
 			token := bearerToken[1]
 			claims, err := authService.ValidateToken(token)
 			if err != nil {
-				utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Token is invalid"})
+				utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Token is invalid or expired"})
 				return
 			}
 

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
@@ -89,6 +90,11 @@ func (a AuthServiceImpl) ValidateToken(tokenString string) (*domains.Claims, err
 		if err == jwt.ErrSignatureInvalid {
 			return nil, apperrors.ErrInvalidSignature
 		}
+
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, apperrors.ErrExpiredToken
+		}
+
 		return nil, err
 	}
 
@@ -125,11 +131,11 @@ func (a AuthServiceImpl) SaveToken(userResponse userdto.UserResponse, authToken 
 
 func (a AuthServiceImpl) GetHashAuthDataFromCache(accessTokenUuid string) (domains.AuthData, error) {
 	result, err := a.Cache.GetAllHashFields(accessTokenUuid)
-	if err != nil {
-		if len(result) == 0 {
-			return domains.AuthData{}, apperrors.ErrRedisValueNotInHash
-		}
+	if len(result) == 0 {
+		return domains.AuthData{}, apperrors.ErrRedisValueNotInHash
+	}
 
+	if err != nil {
 		return domains.AuthData{}, err
 	}
 
