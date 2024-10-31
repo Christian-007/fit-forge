@@ -1,6 +1,7 @@
 package middlewares_test
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	"github.com/Christian-007/fit-forge/internal/pkg/middlewares"
+	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/mock/gomock"
@@ -46,7 +48,20 @@ var _ = Describe("Strict Session Middleware", func() {
 		ctrl.Finish()
 	})
 
-	It("should return http status 401 unauthorized if the Authorization header is nil", func() {
+	It("should return http status 401 unauthorized if the Authorization header does not exist", func() {
+		request.Header.Del("Authorization")
+		handler.ServeHTTP(recorder, request)
+
+		expected := apphttp.ErrorResponse{Message: "Unauthorized"}
+		var result apphttp.ErrorResponse
+		err := json.NewDecoder(recorder.Body).Decode(&result)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(Equal(expected))
+
+		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
+	})
+
+	It("should return http status 401 unauthorized if the Authorization header is empty string", func() {
 		request.Header.Set("Authorization", "")
 
 		handler.ServeHTTP(recorder, request)
@@ -158,5 +173,33 @@ var _ = Describe("Strict Session Middleware", func() {
 
 			Expect(recorder.Code).To(Equal(http.StatusInternalServerError))
 		})
+	})
+
+	It("should call next handler with the correct context if there is no error at all", func() {
+		mockAccessToken := "someAccessToken123"
+		request.Header.Set("Authorization", "Bearer "+mockAccessToken)
+		mockAuthService.EXPECT().ValidateToken(mockAccessToken).Return(&domains.Claims{
+			Uuid: "mockAccessTokenUuid",
+		}, nil)
+		mockAuthData := domains.AuthData{
+			UserId: 17,
+			Role:   2,
+		}
+		mockAuthService.EXPECT().GetHashAuthDataFromCache("mockAccessTokenUuid").Return(mockAuthData, nil)
+		mockCtx := requestctx.WithUserId(context.Background(), mockAuthData.UserId)
+		mockCtx = requestctx.WithRole(mockCtx, mockAuthData.Role)
+
+		nextHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			By("having the correct user id")
+			userId, _ := requestctx.UserId(r.Context())
+			Expect(userId).To(Equal(mockAuthData.UserId))
+
+			By("having the correct user role")
+			role, _ := requestctx.Role(r.Context())
+			Expect(role).To(Equal(mockAuthData.Role))
+		})
+		handler = strictSessionMiddleware(nextHandler)
+
+		handler.ServeHTTP(recorder, request.WithContext(mockCtx))
 	})
 })

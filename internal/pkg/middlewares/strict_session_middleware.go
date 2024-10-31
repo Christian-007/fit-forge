@@ -14,8 +14,8 @@ import (
 func StrictSession(authService services.AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header["Authorization"]
-			if authHeader == nil {
+			authHeader, ok := r.Header["Authorization"]
+			if !ok {
 				utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Unauthorized"})
 				return
 			}
