@@ -18,13 +18,13 @@ import (
 
 var _ = Describe("Strict Session Middleware", func() {
 	var (
-		ctrl             *gomock.Controller
-		mockAuthService       *mock_services.MockAuthService
+		ctrl                    *gomock.Controller
+		mockAuthService         *mock_services.MockAuthService
 		strictSessionMiddleware func(http.Handler) http.Handler
 		nextHandler             http.HandlerFunc
-		handler http.Handler
-		request          *http.Request
-		recorder         *httptest.ResponseRecorder
+		handler                 http.Handler
+		request                 *http.Request
+		recorder                *httptest.ResponseRecorder
 	)
 
 	BeforeEach(func() {
@@ -41,12 +41,12 @@ var _ = Describe("Strict Session Middleware", func() {
 		request = httptest.NewRequest("GET", "/test-users", nil)
 		recorder = httptest.NewRecorder()
 	})
-	
+
 	AfterEach(func() {
 		ctrl.Finish()
 	})
 
-	It("should return http status 401 unauthorized if the Authorization header is nil", func ()  {
+	It("should return http status 401 unauthorized if the Authorization header is nil", func() {
 		request.Header.Set("Authorization", "")
 
 		handler.ServeHTTP(recorder, request)
@@ -60,7 +60,7 @@ var _ = Describe("Strict Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
 	})
 
-	It("should return http status 401 unauthorized if the Authorization header value does not have the right format", func ()  {
+	It("should return http status 401 unauthorized if the Authorization header value does not have the right format", func() {
 		wrongAuthBearerFormat := "123" // should have 'Bearer'
 		request.Header.Set("Authorization", wrongAuthBearerFormat)
 
@@ -75,7 +75,7 @@ var _ = Describe("Strict Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
 	})
 
-	It("should return http status 401 if the token is already expired", func ()  {
+	It("should return http status 401 if the token is already expired", func() {
 		request.Header.Set("Authorization", "Bearer 123")
 		mockAuthService.EXPECT().ValidateToken("123").Return(&domains.Claims{}, apperrors.ErrExpiredToken)
 
@@ -90,7 +90,7 @@ var _ = Describe("Strict Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
 	})
 
-	It("should return http status 401 unauthorized if the token has an invalid signature", func ()  {
+	It("should return http status 401 unauthorized if the token has an invalid signature", func() {
 		request.Header.Set("Authorization", "Bearer 123")
 		mockAuthService.EXPECT().ValidateToken("123").Return(&domains.Claims{}, apperrors.ErrInvalidSignature)
 
@@ -105,7 +105,7 @@ var _ = Describe("Strict Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
 	})
 
-	It("should return http status 500 if there is an unexpected error in validating the token", func ()  {
+	It("should return http status 500 if there is an unexpected error in validating the token", func() {
 		request.Header.Set("Authorization", "Bearer 123")
 		mockError := errors.New("An unexpected error")
 		mockAuthService.EXPECT().ValidateToken("123").Return(&domains.Claims{}, mockError)
@@ -121,12 +121,12 @@ var _ = Describe("Strict Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusInternalServerError))
 	})
 
-	Context("when GetHashAuthDataFromCache returns an error", func ()  {
-		BeforeEach(func ()  {
+	Context("when GetHashAuthDataFromCache returns an error", func() {
+		BeforeEach(func() {
 			mockAccessToken := "someAccessToken123"
-			request.Header.Set("Authorization", "Bearer " + mockAccessToken)
+			request.Header.Set("Authorization", "Bearer "+mockAccessToken)
 			mockAuthService.EXPECT().ValidateToken(mockAccessToken).Return(&domains.Claims{
-				Uuid: "mockAccessTokenUuid",	
+				Uuid: "mockAccessTokenUuid",
 			}, nil)
 		})
 

@@ -20,13 +20,13 @@ import (
 
 var _ = Describe("Logout Session Middleware", func() {
 	var (
-		ctrl             *gomock.Controller
-		mockAuthService       *mock_services.MockAuthService
+		ctrl                    *gomock.Controller
+		mockAuthService         *mock_services.MockAuthService
 		logoutSessionMiddleware func(http.Handler) http.Handler
 		nextHandler             http.HandlerFunc
-		handler http.Handler
-		request          *http.Request
-		recorder         *httptest.ResponseRecorder
+		handler                 http.Handler
+		request                 *http.Request
+		recorder                *httptest.ResponseRecorder
 	)
 
 	BeforeEach(func() {
@@ -43,12 +43,12 @@ var _ = Describe("Logout Session Middleware", func() {
 		request = httptest.NewRequest("GET", "/logout", nil)
 		recorder = httptest.NewRecorder()
 	})
-	
+
 	AfterEach(func() {
 		ctrl.Finish()
 	})
 
-	It("should return http status 401 unauthorized if the Authorization header is nil", func ()  {
+	It("should return http status 401 unauthorized if the Authorization header is nil", func() {
 		request.Header.Set("Authorization", "")
 
 		handler.ServeHTTP(recorder, request)
@@ -62,7 +62,7 @@ var _ = Describe("Logout Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
 	})
 
-	It("should return http status 401 unauthorized if the Authorization header value does not have the right format", func ()  {
+	It("should return http status 401 unauthorized if the Authorization header value does not have the right format", func() {
 		wrongAuthBearerFormat := "123" // should have 'Bearer'
 		request.Header.Set("Authorization", wrongAuthBearerFormat)
 
@@ -77,7 +77,7 @@ var _ = Describe("Logout Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
 	})
 
-	It("should return http status 200 if the token is already expired", func ()  {
+	It("should return http status 200 if the token is already expired", func() {
 		request.Header.Set("Authorization", "Bearer 123")
 		mockAuthService.EXPECT().ValidateToken("123").Return(&domains.Claims{}, apperrors.ErrExpiredToken)
 
@@ -92,7 +92,7 @@ var _ = Describe("Logout Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusOK))
 	})
 
-	It("should return http status 401 unauthorized if the token is not a valid JWT", func ()  {
+	It("should return http status 401 unauthorized if the token is not a valid JWT", func() {
 		request.Header.Set("Authorization", "Bearer 123")
 		mockError := errors.New("Token is not a valid JWT")
 		mockAuthService.EXPECT().ValidateToken("123").Return(&domains.Claims{}, mockError)
@@ -108,12 +108,12 @@ var _ = Describe("Logout Session Middleware", func() {
 		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
 	})
 
-	Context("when GetHashAuthDataFromCache returns an error", func ()  {
-		BeforeEach(func ()  {
+	Context("when GetHashAuthDataFromCache returns an error", func() {
+		BeforeEach(func() {
 			mockAccessToken := "someAccessToken123"
-			request.Header.Set("Authorization", "Bearer " + mockAccessToken)
+			request.Header.Set("Authorization", "Bearer "+mockAccessToken)
 			mockAuthService.EXPECT().ValidateToken(mockAccessToken).Return(&domains.Claims{
-				Uuid: "mockAccessTokenUuid",	
+				Uuid: "mockAccessTokenUuid",
 			}, nil)
 		})
 
@@ -126,7 +126,7 @@ var _ = Describe("Logout Session Middleware", func() {
 				By("having the correct user id")
 				userId, _ := requestctx.UserId(r.Context())
 				Expect(userId).To(Equal(mockUserId))
-	
+
 				By("having the correct user role")
 				role, _ := requestctx.Role(r.Context())
 				Expect(role).To(Equal(0))
@@ -139,7 +139,7 @@ var _ = Describe("Logout Session Middleware", func() {
 		It("should return http status 401 unauthorized if apperrors.ErrRedisValueNotInHash and apperrors.ErrRedisKeyNotFound from GetAuthDataFromCache returned", func() {
 			mockAuthService.EXPECT().GetHashAuthDataFromCache("mockAccessTokenUuid").Return(domains.AuthData{}, apperrors.ErrRedisValueNotInHash)
 			mockAuthService.EXPECT().GetAuthDataFromCache("mockAccessTokenUuid").Return(-1, apperrors.ErrRedisKeyNotFound)
-			
+
 			handler.ServeHTTP(recorder, request)
 
 			expected := apphttp.ErrorResponse{Message: "Unauthorized"}
@@ -154,7 +154,7 @@ var _ = Describe("Logout Session Middleware", func() {
 		It("should return http status 500 if apperrors.ErrRedisValueNotInHash and any other errors from GetAuthDataFromCache returned", func() {
 			mockAuthService.EXPECT().GetHashAuthDataFromCache("mockAccessTokenUuid").Return(domains.AuthData{}, apperrors.ErrRedisValueNotInHash)
 			mockAuthService.EXPECT().GetAuthDataFromCache("mockAccessTokenUuid").Return(-1, errors.New("unexpected error occurred"))
-			
+
 			handler.ServeHTTP(recorder, request)
 
 			expected := apphttp.ErrorResponse{Message: "Internal Server Error"}
@@ -165,10 +165,10 @@ var _ = Describe("Logout Session Middleware", func() {
 
 			Expect(recorder.Code).To(Equal(http.StatusInternalServerError))
 		})
-		
+
 		It("should return http status 401 unauthorized if apperrors.ErrRedisKeyNotFound is returned", func() {
 			mockAuthService.EXPECT().GetHashAuthDataFromCache("mockAccessTokenUuid").Return(domains.AuthData{}, apperrors.ErrRedisKeyNotFound)
-			
+
 			handler.ServeHTTP(recorder, request)
 
 			expected := apphttp.ErrorResponse{Message: "Unauthorized"}
@@ -182,7 +182,7 @@ var _ = Describe("Logout Session Middleware", func() {
 
 		It("should return http status 500 for any other errors returned", func() {
 			mockAuthService.EXPECT().GetHashAuthDataFromCache("mockAccessTokenUuid").Return(domains.AuthData{}, errors.New("some other errors"))
-			
+
 			handler.ServeHTTP(recorder, request)
 
 			expected := apphttp.ErrorResponse{Message: "Internal Server Error"}
@@ -198,12 +198,12 @@ var _ = Describe("Logout Session Middleware", func() {
 	It("should call next handler with the correct context if there is no error at all", func() {
 		mockAuthData := domains.AuthData{
 			UserId: 123,
-			Role: 2,
+			Role:   2,
 		}
 		mockAccessToken := "someAccessToken123"
-		request.Header.Set("Authorization", "Bearer " + mockAccessToken)
+		request.Header.Set("Authorization", "Bearer "+mockAccessToken)
 		mockAuthService.EXPECT().ValidateToken(mockAccessToken).Return(&domains.Claims{
-			Uuid: "mockAccessTokenUuid",	
+			Uuid: "mockAccessTokenUuid",
 		}, nil)
 		mockCtx := requestctx.WithUserId(context.Background(), mockAuthData.UserId)
 		mockCtx = requestctx.WithRole(mockCtx, mockAuthData.Role)

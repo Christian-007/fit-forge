@@ -48,7 +48,7 @@ func LogoutSession(authService services.AuthService) func(http.Handler) http.Han
 					if err != nil {
 						if err == apperrors.ErrRedisKeyNotFound {
 							utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Unauthorized"})
-							return	
+							return
 						}
 
 						utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
