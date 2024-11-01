@@ -15,8 +15,8 @@ func LogoutSession(authService services.AuthService) func(http.Handler) http.Han
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			authHeader := r.Header["Authorization"]
-			if authHeader == nil {
+			authHeader, ok := r.Header["Authorization"]
+			if !ok {
 				utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Unauthorized"})
 				return
 			}

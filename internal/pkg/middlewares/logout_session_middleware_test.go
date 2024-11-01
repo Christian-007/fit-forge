@@ -48,6 +48,19 @@ var _ = Describe("Logout Session Middleware", func() {
 		ctrl.Finish()
 	})
 
+	It("should return http status 401 unauthorized if the Authorization header does not exist", func() {
+		request.Header.Del("Authorization")
+		handler.ServeHTTP(recorder, request)
+
+		expected := apphttp.ErrorResponse{Message: "Unauthorized"}
+		var result apphttp.ErrorResponse
+		err := json.NewDecoder(recorder.Body).Decode(&result)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(Equal(expected))
+
+		Expect(recorder.Code).To(Equal(http.StatusUnauthorized))
+	})
+
 	It("should return http status 401 unauthorized if the Authorization header is nil", func() {
 		request.Header.Set("Authorization", "")
 
