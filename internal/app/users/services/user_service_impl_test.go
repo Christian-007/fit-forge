@@ -136,4 +136,56 @@ var _ = Describe("User Service", func() {
 			})
 		})
 	})
+
+	Describe("Get One By Email", func ()  {
+		It("should return a user not found error if the user does not exist", func ()  {
+			mockEmail := "email@exmaple.com"
+			mockEmptyUserModel := domains.UserModel{}
+			mockEmptyUserResponse := dto.GetUserByEmailResponse{}
+			mockUserRepository.EXPECT().GetOneByEmail(mockEmail).Return(mockEmptyUserModel, pgx.ErrNoRows)
+
+			user, err := userService.GetOneByEmail(mockEmail)
+
+			Expect(user).To(Equal(mockEmptyUserResponse))
+			Expect(err).To(MatchError(apperrors.ErrUserNotFound))
+		})
+
+		It("should return the unexpected error if there is an unexpected error", func ()  {
+			mockEmail := "email@exmaple.com"
+			mockEmptyUserModel := domains.UserModel{}
+			mockEmptyUserResponse := dto.GetUserByEmailResponse{}
+			mockError := errors.New("an unexpected error")
+			mockUserRepository.EXPECT().GetOneByEmail(mockEmail).Return(mockEmptyUserModel, mockError)
+
+			user, err := userService.GetOneByEmail(mockEmail)
+
+			Expect(user).To(Equal(mockEmptyUserResponse))
+			Expect(err).To(MatchError(mockError))
+		})
+
+		It("should return the correct user if the user is found", func ()  {
+			mockEmail := "email@exmaple.com"
+			mockUserModel := domains.UserModel{
+				Id: 1,
+				Name: "John",
+				Email: mockEmail,
+				Password: []byte("asd"),
+				Role: 2,
+				CreatedAt: time.Date(2024, 02, 01, 1, 1, 1, 0, time.UTC),
+			}
+			mockUserResponse := dto.GetUserByEmailResponse{
+				Id: 1,
+				Name: "John",
+				Email: mockEmail,
+				Password: []byte("asd"),
+				Role: 2,
+			}
+			mockUserRepository.EXPECT().GetOneByEmail(mockEmail).Return(mockUserModel, nil)
+
+			user, err := userService.GetOneByEmail(mockEmail)
+
+			Expect(user).To(Equal(mockUserResponse))
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
 })
