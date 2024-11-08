@@ -55,6 +55,7 @@ func LogoutSession(authService services.AuthService) func(http.Handler) http.Han
 						return
 					}
 
+					ctx = requestctx.WithAccessTokenUuid(ctx, claims.Uuid)
 					ctx = requestctx.WithUserId(ctx, userId)
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
@@ -69,6 +70,7 @@ func LogoutSession(authService services.AuthService) func(http.Handler) http.Han
 				return
 			}
 
+			ctx = requestctx.WithAccessTokenUuid(ctx, claims.Uuid)
 			ctx = requestctx.WithUserId(ctx, authData.UserId)
 			ctx = requestctx.WithRole(ctx, authData.Role)
 			next.ServeHTTP(w, r.WithContext(ctx))
