@@ -33,13 +33,24 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 
 	strictSessionMiddleware := middlewares.StrictSession(authService)
 
+	// All routes require auth session check
 	r.Use(strictSessionMiddleware)
 
-	r.Get("/all", todoHandler.GetAll)
-	r.Get("/", todoHandler.GetAllByUserId)
-	r.Get("/{id}", todoHandler.GetOne)
-	r.Post("/", todoHandler.Create)
-	r.Delete("/{id}", todoHandler.Delete)
+	// Routes that can be accessed by all roles
+	r.Group(func(r chi.Router) {
+		r.Get("/", todoHandler.GetAllByUserId)
+		r.Get("/{id}", todoHandler.GetOne)
+		r.Post("/", todoHandler.Create)
+		r.Delete("/{id}", todoHandler.Delete)
+	})
+
+	// Routes that can only be accessed by Admin role
+	adminRoleEnum := 1
+	adminRoleMiddleware := middlewares.Role(adminRoleEnum)
+	r.Group(func(r chi.Router) {
+		r.Use(adminRoleMiddleware)
+		r.Get("/all", todoHandler.GetAll)
+	})
 
 	return r
 }
