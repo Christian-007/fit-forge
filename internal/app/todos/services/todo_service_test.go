@@ -34,7 +34,7 @@ var _ = Describe("Todo Service", func() {
 	})
 
 	Describe("Get All", func() {
-		It("should return an error when TodoRepository.GetAll() returns an error", func ()  {
+		It("should return an error when TodoRepository.GetAll() returns an error", func() {
 			mockGetAllTodosDto := []dto.GetAllTodosResponse{}
 			mockTodoModel := []domains.TodoModel{}
 			mockTodoRepository.EXPECT().GetAll().Return(mockTodoModel, errors.New("some error"))
@@ -45,7 +45,7 @@ var _ = Describe("Todo Service", func() {
 			Expect(err).To(MatchError("some error"))
 		})
 
-		It("should return a list of todos when TodoRepository.GetAll() returns a success", func ()  {
+		It("should return a list of todos when TodoRepository.GetAll() returns a success", func() {
 			mockGetAllTodosDto := []dto.GetAllTodosResponse{
 				{Id: 1, Title: "Todo 1", IsCompleted: false, UserId: 1},
 				{Id: 2, Title: "Todo 2", IsCompleted: false, UserId: 1},
@@ -64,7 +64,7 @@ var _ = Describe("Todo Service", func() {
 	})
 
 	Describe("Get All By User Id", func() {
-		It("should return an error when TodoRepository.GetAllByUserId() returns an error", func ()  {
+		It("should return an error when TodoRepository.GetAllByUserId() returns an error", func() {
 			mockTodoResponse := []dto.TodoResponse{}
 			mockTodoModel := []domains.TodoModel{}
 			mockError := errors.New("some error")
@@ -76,7 +76,7 @@ var _ = Describe("Todo Service", func() {
 			Expect(err).To(MatchError(mockError))
 		})
 
-		It("should return a list of todos when TodoRepository.GetAllByUserId() returns a success", func ()  {
+		It("should return a list of todos when TodoRepository.GetAllByUserId() returns a success", func() {
 			mockTodoResponse := []dto.TodoResponse{
 				{Id: 1, Title: "Todo 1", IsCompleted: false},
 				{Id: 2, Title: "Todo 2", IsCompleted: false},
@@ -95,35 +95,35 @@ var _ = Describe("Todo Service", func() {
 	})
 
 	Describe("Get One By User Id", func() {
-		It("should return an error when TodoRepository.GetOneByUserId() returns a todo not found error", func ()  {
+		It("should return an error when TodoRepository.GetOneByUserId() returns a todo not found error", func() {
 			mockTodoResponse := dto.TodoResponse{}
 			mockTodoModel := domains.TodoModel{}
 			mockTodoRepository.EXPECT().GetOneByUserId(1, 2).Return(mockTodoModel, pgx.ErrNoRows)
 
-			todo, err := todoService.GetOneByUserId(1,2)
+			todo, err := todoService.GetOneByUserId(1, 2)
 
 			Expect(todo).To(Equal(mockTodoResponse))
 			Expect(err).To(MatchError(apperrors.ErrTodoNotFound))
 		})
 
-		It("should return an error when TodoRepository.GetOneByUserId() returns an unexpected error", func ()  {
+		It("should return an error when TodoRepository.GetOneByUserId() returns an unexpected error", func() {
 			mockTodoResponse := dto.TodoResponse{}
 			mockTodoModel := domains.TodoModel{}
 			mockError := errors.New("an unxpected error")
 			mockTodoRepository.EXPECT().GetOneByUserId(1, 2).Return(mockTodoModel, mockError)
 
-			todo, err := todoService.GetOneByUserId(1,2)
+			todo, err := todoService.GetOneByUserId(1, 2)
 
 			Expect(todo).To(Equal(mockTodoResponse))
 			Expect(err).To(MatchError(mockError))
 		})
 
-		It("should return a correct todo when TodoRepository.GetAllByUserId() returns a success", func ()  {
+		It("should return a correct todo when TodoRepository.GetAllByUserId() returns a success", func() {
 			mockTodoResponse := dto.TodoResponse{Id: 1, Title: "Todo 1", IsCompleted: false}
 			mockTodoModel := domains.TodoModel{Id: 1, Title: "Todo 1", IsCompleted: false}
-			mockTodoRepository.EXPECT().GetOneByUserId(1,2).Return(mockTodoModel, nil)
+			mockTodoRepository.EXPECT().GetOneByUserId(1, 2).Return(mockTodoModel, nil)
 
-			todo, err := todoService.GetOneByUserId(1,2)
+			todo, err := todoService.GetOneByUserId(1, 2)
 
 			Expect(todo).To(Equal(mockTodoResponse))
 			Expect(err).NotTo(HaveOccurred())
@@ -131,7 +131,7 @@ var _ = Describe("Todo Service", func() {
 	})
 
 	Describe("Create", func() {
-		It("should return an error when TodoRepository.Create() returns an unexpected error", func ()  {
+		It("should return an error when TodoRepository.Create() returns an unexpected error", func() {
 			mockCreateTodoRequest := dto.CreateTodoRequest{
 				Title: "A new Todo",
 			}
@@ -140,13 +140,13 @@ var _ = Describe("Todo Service", func() {
 			mockError := errors.New("an unxpected error")
 			mockTodoRepository.EXPECT().Create(1, mockTodoModel).Return(domains.TodoModel{}, mockError)
 
-			todo, err := todoService.Create(1,mockCreateTodoRequest)
+			todo, err := todoService.Create(1, mockCreateTodoRequest)
 
 			Expect(todo).To(Equal(mockTodoResponse))
 			Expect(err).To(MatchError(mockError))
 		})
 
-		It("should return the created todo when TodoRepository.Create() returns a success", func ()  {
+		It("should return the created todo when TodoRepository.Create() returns a success", func() {
 			mockCreateTodoRequest := dto.CreateTodoRequest{
 				Title: "A new Todo",
 			}
@@ -161,20 +161,20 @@ var _ = Describe("Todo Service", func() {
 		})
 	})
 
-	Describe("Delete", func ()  {
-		It("should return an error when TodoRepository.Delete() returns an unexpected error", func ()  {
+	Describe("Delete", func() {
+		It("should return an error when TodoRepository.Delete() returns an unexpected error", func() {
 			mockError := errors.New("an unexpected error")
-			mockTodoRepository.EXPECT().Delete(1,1).Return(mockError)
+			mockTodoRepository.EXPECT().Delete(1, 1).Return(mockError)
 
-			err := todoService.Delete(1,1)
+			err := todoService.Delete(1, 1)
 
 			Expect(err).To(MatchError(mockError))
 		})
 
-		It("should return no error if the delete operation is a success", func ()  {
-			mockTodoRepository.EXPECT().Delete(1,1).Return(nil)
+		It("should return no error if the delete operation is a success", func() {
+			mockTodoRepository.EXPECT().Delete(1, 1).Return(nil)
 
-			err := todoService.Delete(1,1)
+			err := todoService.Delete(1, 1)
 
 			Expect(err).NotTo(HaveOccurred())
 		})

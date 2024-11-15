@@ -14,7 +14,7 @@ type MailtrapEmailService struct {
 }
 
 type MailtrapOptions struct {
-	Host string
+	Host   string
 	ApiKey string
 }
 
@@ -37,7 +37,7 @@ func (m MailtrapEmailService) SendWithTemplate(reqBody domains.EmailWithTemplate
 		return err
 	}
 
-	req.Header.Set("Authorization", "Bearer " + m.ApiKey)
+	req.Header.Set("Authorization", "Bearer "+m.ApiKey)
 	req.Header.Set("Content-Type", "application/json")
 
 	httpClient := &http.Client{}
@@ -55,5 +55,3 @@ func (m MailtrapEmailService) SendWithTemplate(reqBody domains.EmailWithTemplate
 	fmt.Println("Email sent successfully")
 	return nil
 }
-
-
