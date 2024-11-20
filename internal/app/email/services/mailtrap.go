@@ -9,22 +9,22 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/email/domains"
 )
 
-type MailtrapEmailService struct {
-	MailtrapOptions
+type MailtrapSender struct {
+	MailtrapSenderOptions
 }
 
-type MailtrapOptions struct {
+type MailtrapSenderOptions struct {
 	Host   string
 	ApiKey string
 }
 
-func NewMailtrapEmailService(options MailtrapOptions) MailtrapEmailService {
-	return MailtrapEmailService{
+func NewMailtrapEmailService(options MailtrapSenderOptions) MailtrapSender {
+	return MailtrapSender{
 		options,
 	}
 }
 
-func (m MailtrapEmailService) SendWithTemplate(reqBody domains.EmailWithTemplateRequest) error {
+func (m MailtrapSender) SendWithTemplate(reqBody domains.EmailWithTemplateRequest) error {
 	apiUrl := m.Host + "/api/send/3274815"
 
 	reqBodyJson, err := json.Marshal(reqBody)
