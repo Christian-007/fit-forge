@@ -13,9 +13,9 @@ type EmailService struct {
 }
 
 type EmailServiceOptions struct {
-	Host string
+	Host         string
 	TokenService security.TokenService
-	Cache cache.Cache
+	Cache        cache.Cache
 }
 
 func NewEmailService(options EmailServiceOptions) EmailService {
@@ -30,9 +30,9 @@ func (e EmailService) CreateVerificationLink(email string) (string, error) {
 		return "", err
 	}
 
-	err = e.Cache.Set(randomToken.Hashed, email, time.Hour * 24)
+	err = e.Cache.Set(randomToken.Hashed, email, time.Hour*24)
 	if err != nil {
-		return "", err	
+		return "", err
 	}
 
 	link := e.Host + verificationPath + randomToken.Raw

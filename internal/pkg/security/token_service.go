@@ -7,7 +7,7 @@ import (
 )
 
 type RandomToken struct {
-	Raw string
+	Raw    string
 	Hashed string
 }
 
@@ -40,7 +40,7 @@ func (t TokenService) Generate() (RandomToken, error) {
 	}
 
 	return RandomToken{
-		Raw: rawToken,
+		Raw:    rawToken,
 		Hashed: hashedToken,
 	}, nil
 }
