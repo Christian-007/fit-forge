@@ -131,6 +131,24 @@ func (u UserServiceImpl) UpdateOne(id int, updateUserRequest dto.UpdateUserReque
 	return toUserResponse(user), nil
 }
 
+func (u UserServiceImpl) UpdateOneByEmail(email string, updateUserRequest dto.UpdateUserRequest) (dto.UserResponse, error) {
+	userModel, err := toUserModel(updateUserRequest)
+	if err != nil {
+		return dto.UserResponse{}, err
+	}
+
+	user, err := u.UserRepository.UpdateOneByEmail(email, userModel)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.UserResponse{}, apperrors.ErrUserNotFound
+		}
+
+		return dto.UserResponse{}, err
+	}
+
+	return toUserResponse(user), nil
+}
+
 func toUserModel(updateUserRequest dto.UpdateUserRequest) (domains.UserModel, error) {
 	var userModel domains.UserModel
 
@@ -155,6 +173,10 @@ func toUserModel(updateUserRequest dto.UpdateUserRequest) (domains.UserModel, er
 		userModel.Role = *updateUserRequest.Role
 	}
 
+	if updateUserRequest.EmailVerifiedAt != nil {
+		userModel.EmailVerifiedAt = updateUserRequest.EmailVerifiedAt
+	}
+
 	return userModel, nil
 }
 
@@ -164,5 +186,6 @@ func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 		Name:  userModel.Name,
 		Email: userModel.Email,
 		Role:  userModel.Role,
+		EmailVerifiedAt: *userModel.EmailVerifiedAt,
 	}
 }

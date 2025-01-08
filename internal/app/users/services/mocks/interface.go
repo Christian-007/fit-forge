@@ -20,6 +20,7 @@ import (
 type MockUserService struct {
 	ctrl     *gomock.Controller
 	recorder *MockUserServiceMockRecorder
+	isgomock struct{}
 }
 
 // MockUserServiceMockRecorder is the mock recorder for MockUserService.
@@ -126,4 +127,19 @@ func (m *MockUserService) UpdateOne(id int, updateUserRequest dto.UpdateUserRequ
 func (mr *MockUserServiceMockRecorder) UpdateOne(id, updateUserRequest any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockUserService)(nil).UpdateOne), id, updateUserRequest)
+}
+
+// UpdateOneByEmail mocks base method.
+func (m *MockUserService) UpdateOneByEmail(email string, updateUserRequest dto.UpdateUserRequest) (dto.UserResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateOneByEmail", email, updateUserRequest)
+	ret0, _ := ret[0].(dto.UserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateOneByEmail indicates an expected call of UpdateOneByEmail.
+func (mr *MockUserServiceMockRecorder) UpdateOneByEmail(email, updateUserRequest any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOneByEmail", reflect.TypeOf((*MockUserService)(nil).UpdateOneByEmail), email, updateUserRequest)
 }

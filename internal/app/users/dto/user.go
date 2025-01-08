@@ -1,15 +1,18 @@
 package dto
 
 import (
+	"time"
+
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 type UserResponse struct {
-	Id    int    `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Role  int    `json:"role"`
+	Id              int       `json:"id"`
+	Name            string    `json:"name"`
+	Email           string    `json:"email"`
+	Role            int       `json:"role"`
+	EmailVerifiedAt time.Time `json:"emailVerifiedAt"`
 }
 
 type GetUserByEmailResponse struct {
@@ -35,10 +38,11 @@ func (c CreateUserRequest) Validate() error {
 }
 
 type UpdateUserRequest struct {
-	Name     *string `json:"name"`
-	Email    *string `json:"email"`
-	Password *string `json:"password"`
-	Role     *int    `json:"role"`
+	Name            *string    `json:"name"`
+	Email           *string    `json:"email"`
+	Password        *string    `json:"password"`
+	Role            *int       `json:"role"`
+	EmailVerifiedAt *time.Time `json:"emailVerifiedAt"`
 }
 
 // As of 28 May '24 does not support an empty string update

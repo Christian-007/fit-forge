@@ -20,6 +20,7 @@ import (
 type MockUserRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockUserRepositoryMockRecorder
+	isgomock struct{}
 }
 
 // MockUserRepositoryMockRecorder is the mock recorder for MockUserRepository.
@@ -126,4 +127,19 @@ func (m *MockUserRepository) UpdateOne(id int, updateUser domains.UserModel) (do
 func (mr *MockUserRepositoryMockRecorder) UpdateOne(id, updateUser any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockUserRepository)(nil).UpdateOne), id, updateUser)
+}
+
+// UpdateOneByEmail mocks base method.
+func (m *MockUserRepository) UpdateOneByEmail(email string, updateUser domains.UserModel) (domains.UserModel, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateOneByEmail", email, updateUser)
+	ret0, _ := ret[0].(domains.UserModel)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateOneByEmail indicates an expected call of UpdateOneByEmail.
+func (mr *MockUserRepositoryMockRecorder) UpdateOneByEmail(email, updateUser any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOneByEmail", reflect.TypeOf((*MockUserRepository)(nil).UpdateOneByEmail), email, updateUser)
 }

@@ -2,10 +2,12 @@ package web
 
 import (
 	authservices "github.com/Christian-007/fit-forge/internal/app/auth/services"
+	emailservices "github.com/Christian-007/fit-forge/internal/app/email/services"
 	"github.com/Christian-007/fit-forge/internal/app/users/repositories"
 	userservices "github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/middlewares"
+	"github.com/Christian-007/fit-forge/internal/pkg/security"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -15,9 +17,23 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	userService := userservices.NewUserService(userservices.UserServiceOptions{
 		UserRepository: userRepositoryPg,
 	})
+	tokenService := security.NewTokenService(security.TokenServiceOptions{
+		SecretKey: "sup3rs3cr3t", // TODO: move this to `.env`
+	})
+	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
+		Host:         "http://localhost:4000",
+		Cache:        appCtx.RedisClient,
+		TokenService: tokenService,
+	})
+	mailtrapSender := emailservices.NewMailtrapEmailService(emailservices.MailtrapSenderOptions{
+		Host:   appCtx.EnvVariableService.Get("EMAIL_HOST"),
+		ApiKey: appCtx.EnvVariableService.Get("MAILTRAP_API_KEY"),
+	})
 	userHandler := NewUserHandler(UserHandlerOptions{
-		UserService: userService,
-		Logger:      appCtx.Logger,
+		UserService:    userService,
+		Logger:         appCtx.Logger,
+		EmailService:   emailService,
+		MailtrapSender: mailtrapSender,
 	})
 	authService := authservices.NewAuthServiceImpl(authservices.AuthServiceOptions{
 		UserService:        userService,

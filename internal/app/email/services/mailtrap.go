@@ -24,6 +24,7 @@ func NewMailtrapEmailService(options MailtrapSenderOptions) MailtrapSender {
 	}
 }
 
+// TODO: Use go-resty for better debugging experience
 func (m MailtrapSender) SendWithTemplate(reqBody domains.EmailWithTemplateRequest) error {
 	apiUrl := m.Host + "/api/send/3274815"
 

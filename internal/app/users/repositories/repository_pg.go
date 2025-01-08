@@ -105,9 +105,14 @@ func (u UserRepositoryPg) UpdateOne(id int, updateUser domains.UserModel) (domai
 	args := createUpdateUserPgxArgs(id, updateUser)
 	query := `
 		UPDATE users 
-		SET name = COALESCE(@name, name), email = COALESCE(@email, email), password = COALESCE(@password, password), role = COALESCE(@role, role)
+		SET
+			name = COALESCE(@name, name),
+			email = COALESCE(@email, email),
+			password = COALESCE(@password, password),
+			role = COALESCE(@role, role),
+			email_verified_at = COALESCE(@email_verified_at, email_verified_at)
 		WHERE id = @id
-		RETURNING id, name, email, password, role, created_at
+		RETURNING id, name, email, password, role, created_at, email_verified_at
 	`
 
 	var user domains.UserModel
@@ -118,12 +123,68 @@ func (u UserRepositoryPg) UpdateOne(id int, updateUser domains.UserModel) (domai
 		&user.Password,
 		&user.Role,
 		&user.CreatedAt,
+		&user.EmailVerifiedAt,
 	)
 	if err != nil {
 		return domains.UserModel{}, err
 	}
 
 	return user, nil
+}
+
+func (u UserRepositoryPg) UpdateOneByEmail(email string, updateUser domains.UserModel) (domains.UserModel, error) {
+	args := createUpdateUserPgxArgsByEmail(email, updateUser)
+	query := `
+		UPDATE users 
+		SET
+			name = COALESCE(@name, name),
+			email = COALESCE(@email, email),
+			password = COALESCE(@password, password),
+			role = COALESCE(@role, role),
+			email_verified_at = COALESCE(@email_verified_at, email_verified_at)
+		WHERE email = @email
+		RETURNING id, name, email, password, role, created_at, email_verified_at
+	`
+
+	var user domains.UserModel
+	err := u.db.QueryRow(context.Background(), query, args).Scan(
+		&user.Id,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.Role,
+		&user.CreatedAt,
+		&user.EmailVerifiedAt,
+	)
+	if err != nil {
+		return domains.UserModel{}, err
+	}
+
+	return user, nil
+}
+
+func createUpdateUserPgxArgsByEmail(email string, updateUser domains.UserModel) pgx.NamedArgs {
+	result := pgx.NamedArgs{
+		"email": email,
+	}
+
+	if updateUser.Name != "" {
+		result["name"] = updateUser.Name
+	}
+	if updateUser.Email != "" {
+		result["email"] = updateUser.Email
+	}
+	if len(updateUser.Password) > 0 {
+		result["password"] = updateUser.Password
+	}
+	if updateUser.Role != 0 {
+		result["role"] = updateUser.Role
+	}
+	if updateUser.EmailVerifiedAt != nil {
+		result["email_verified_at"] = updateUser.EmailVerifiedAt
+	}
+
+	return result
 }
 
 func createUpdateUserPgxArgs(id int, updateUser domains.UserModel) pgx.NamedArgs {
@@ -142,6 +203,9 @@ func createUpdateUserPgxArgs(id int, updateUser domains.UserModel) pgx.NamedArgs
 	}
 	if updateUser.Role != 0 {
 		result["role"] = updateUser.Role
+	}
+	if updateUser.EmailVerifiedAt.IsZero() {
+		result["email_verified_at"] = updateUser.EmailVerifiedAt
 	}
 
 	return result

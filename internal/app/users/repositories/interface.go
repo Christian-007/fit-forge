@@ -10,4 +10,5 @@ type UserRepository interface {
 	Create(user domains.UserModel) (domains.UserModel, error)
 	Delete(id int) error
 	UpdateOne(id int, updateUser domains.UserModel) (domains.UserModel, error)
+	UpdateOneByEmail(email string, updateUser domains.UserModel) (domains.UserModel, error)
 }

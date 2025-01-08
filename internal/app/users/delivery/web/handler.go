@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	emaildomain "github.com/Christian-007/fit-forge/internal/app/email/domains"
+	emailservices "github.com/Christian-007/fit-forge/internal/app/email/services"
 	"github.com/Christian-007/fit-forge/internal/app/users/dto"
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
@@ -18,8 +20,10 @@ type UserHandler struct {
 }
 
 type UserHandlerOptions struct {
-	UserService services.UserService
-	Logger      applog.Logger
+	UserService    services.UserService
+	Logger         applog.Logger
+	EmailService   emailservices.EmailService
+	MailtrapSender emailservices.MailtrapSender
 }
 
 func NewUserHandler(options UserHandlerOptions) UserHandler {
@@ -79,6 +83,11 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: need to findUserByEmail() first, to check if the user
+	// has registered before, but didn't verify the email
+	// If yes, then proceed to overwrite the old with the new data
+	// and proceed to send the email verification again.
+
 	userResponse, err := u.UserService.Create(createUserRequest)
 	if err != nil {
 		u.Logger.Error(err.Error())
@@ -89,6 +98,37 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		}
 
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	verificationLink, err := u.EmailService.CreateVerificationLink(userResponse.Email)
+	if err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Cannot generate an email verification link"})
+		return
+	}
+
+	emailRequest := emaildomain.EmailWithTemplateRequest{
+		From: emaildomain.EmailAddressOptions{
+			Email: "hello@demomailtrap.com",
+			Name:  "No Reply at Fit Forge",
+		},
+		To: []emaildomain.EmailAddressOptions{
+			{
+				Email: userResponse.Email,
+				Name:  userResponse.Name,
+			},
+		},
+		TemplateUuid: "fdbefad8-2410-45d2-bded-9d1b647ac416",
+		TemplateVariables: map[string]any{
+			"user_name":         userResponse.Name,
+			"verification_link": verificationLink,
+		},
+	}
+	err = u.MailtrapSender.SendWithTemplate(emailRequest)
+	if err != nil {
+		u.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Cannot send an email verification"})
 		return
 	}
 

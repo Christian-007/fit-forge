@@ -12,4 +12,5 @@ type UserService interface {
 	Create(createUserRequest dto.CreateUserRequest) (dto.UserResponse, error)
 	Delete(id int) error
 	UpdateOne(id int, updateUserRequest dto.UpdateUserRequest) (dto.UserResponse, error)
+	UpdateOneByEmail(email string, updateUserRequest dto.UpdateUserRequest) (dto.UserResponse, error)
 }

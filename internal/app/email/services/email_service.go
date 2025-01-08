@@ -39,21 +39,21 @@ func (e EmailService) CreateVerificationLink(email string) (string, error) {
 	return link, nil
 }
 
-func (e EmailService) Verify(rawToken string) (string, error) {
+func (e EmailService) Verify(rawToken string) (string, string, error) {
 	hashed, err := e.TokenService.HashWithSecret(rawToken)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	email, err := e.Cache.Get(hashed)
 	if err != nil {
-		return "", apperrors.ErrRedisKeyNotFound
+		return "", "", apperrors.ErrRedisKeyNotFound
 	}
 
 	stringEmail, ok := email.(string)
 	if !ok {
-		return "", apperrors.ErrTypeAssertion
+		return "", "", apperrors.ErrTypeAssertion
 	}
 
-	return stringEmail, nil
+	return stringEmail, hashed, nil
 }
