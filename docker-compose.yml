@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  postgresql:
+    image: postgres:12-alpine
+    container_name: postgres12_compose
+    env_file:
+      - ./.env
+    ports:
+      - "5434:5432"
