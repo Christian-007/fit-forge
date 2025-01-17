@@ -45,7 +45,7 @@ func main() {
 	// Open Redis Connection
 	client, err := cache.NewRedisCache(&redis.Options{
 		Addr:     envVariableService.Get("REDIS_DSN"),
-		Password: "",
+		Password: envVariableService.Get("REDIS_PASSWORD"),
 		DB:       0,
 	})
 	if err != nil {
