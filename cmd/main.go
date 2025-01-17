@@ -35,7 +35,9 @@ func main() {
 	// Open DB connection
 	pool, err := db.OpenPostgresDbPool(envVariableService.Get("POSTGRES_URL"))
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("Failed to connect to Postgresql", 
+			slog.String("error", err.Error()),
+		)
 		os.Exit(1)
 	}
 	defer pool.Close()
@@ -47,7 +49,9 @@ func main() {
 		DB:       0,
 	})
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("Failed to connect to Redis", 
+			slog.String("error", err.Error()),
+		)
 		os.Exit(1)
 	}
 
