@@ -8,11 +8,11 @@ import (
 )
 
 type UserResponse struct {
-	Id              int       `json:"id"`
-	Name            string    `json:"name"`
-	Email           string    `json:"email"`
-	Role            int       `json:"role"`
-	EmailVerifiedAt time.Time `json:"emailVerifiedAt"`
+	Id              int        `json:"id"`
+	Name            string     `json:"name"`
+	Email           string     `json:"email"`
+	Role            int        `json:"role"`
+	EmailVerifiedAt *time.Time `json:"emailVerifiedAt"`
 }
 
 type GetUserByEmailResponse struct {

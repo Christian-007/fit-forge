@@ -18,7 +18,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		UserRepository: userRepositoryPg,
 	})
 	tokenService := security.NewTokenService(security.TokenServiceOptions{
-		SecretKey: "sup3rs3cr3t", // TODO: move this to `.env`
+		SecretKey: appCtx.EnvVariableService.Get("AUTH_SECRET_KEY"),
 	})
 	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
 		Host:         "http://localhost:4000",

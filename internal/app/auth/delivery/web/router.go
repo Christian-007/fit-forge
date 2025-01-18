@@ -25,9 +25,8 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	})
 	logoutSessionMiddleware := middlewares.LogoutSession(authService)
 
-	// TODO: move secret key to .env
 	tokenService := security.NewTokenService(security.TokenServiceOptions{
-		SecretKey: "haha",
+		SecretKey: appCtx.EnvVariableService.Get("AUTH_SECRET_KEY"),
 	})
 	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
 		Host:         "http://localhost:4000",
@@ -40,7 +39,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Logger:       appCtx.Logger,
 		UserService:  userService,
 		EmailService: emailService,
-		Cache: appCtx.RedisClient,
+		Cache:        appCtx.RedisClient,
 	})
 
 	// Public routes

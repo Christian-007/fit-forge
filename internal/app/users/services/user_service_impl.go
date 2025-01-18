@@ -182,10 +182,10 @@ func toUserModel(updateUserRequest dto.UpdateUserRequest) (domains.UserModel, er
 
 func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 	return dto.UserResponse{
-		Id:    userModel.Id,
-		Name:  userModel.Name,
-		Email: userModel.Email,
-		Role:  userModel.Role,
-		EmailVerifiedAt: *userModel.EmailVerifiedAt,
+		Id:              userModel.Id,
+		Name:            userModel.Name,
+		Email:           userModel.Email,
+		Role:            userModel.Role,
+		EmailVerifiedAt: userModel.EmailVerifiedAt,
 	}
 }

@@ -68,7 +68,7 @@ func (u UserRepositoryPg) GetOneByEmail(email string) (domains.UserModel, error)
 }
 
 func (u UserRepositoryPg) Create(user domains.UserModel) (domains.UserModel, error) {
-	query := "INSERT INTO users(name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, password, role, created_at"
+	query := "INSERT INTO users(name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, password, role, email_verified_at, created_at"
 
 	var insertedUser domains.UserModel
 	err := u.db.QueryRow(context.Background(), query, user.Name, user.Email, user.Password).Scan(
@@ -77,6 +77,7 @@ func (u UserRepositoryPg) Create(user domains.UserModel) (domains.UserModel, err
 		&insertedUser.Email,
 		&insertedUser.Password,
 		&insertedUser.Role,
+		&insertedUser.EmailVerifiedAt,
 		&insertedUser.CreatedAt,
 	)
 	if err != nil {
