@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -100,6 +101,7 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
+	u.Logger.Info("Succefully created a user", slog.String("email", userResponse.Email))
 
 	verificationLink, err := u.EmailService.CreateVerificationLink(userResponse.Email)
 	if err != nil {
@@ -131,6 +133,7 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Cannot send an email verification"})
 		return
 	}
+	u.Logger.Info("Succefully send a verification email", slog.String("email", userResponse.Email))
 
 	utils.SendResponse(w, http.StatusOK, userResponse)
 }

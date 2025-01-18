@@ -53,6 +53,5 @@ func (m MailtrapSender) SendWithTemplate(reqBody domains.EmailWithTemplateReques
 		return nil
 	}
 
-	fmt.Println("Email sent successfully")
 	return nil
 }
