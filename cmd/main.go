@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -12,6 +14,12 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
+
+	"github.com/ThreeDotsLabs/watermill"
+	_ "github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
+	_ "github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill/message"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -35,7 +43,7 @@ func main() {
 	// Open DB connection
 	pool, err := db.OpenPostgresDbPool(envVariableService.Get("POSTGRES_URL"))
 	if err != nil {
-		logger.Error("Failed to connect to Postgresql", 
+		logger.Error("Failed to connect to Postgresql",
 			slog.String("error", err.Error()),
 		)
 		os.Exit(1)
@@ -49,11 +57,33 @@ func main() {
 		DB:       0,
 	})
 	if err != nil {
-		logger.Error("Failed to connect to Redis", 
+		logger.Error("Failed to connect to Redis",
 			slog.String("error", err.Error()),
 		)
 		os.Exit(1)
 	}
+
+	amqpConfig := amqp.NewDurableQueueConfig(envVariableService.Get("RABBITMQ_URL"))
+	subscriber, err := amqp.NewSubscriber(
+		amqpConfig,
+		watermill.NewStdLogger(false, false),
+	)
+	if err != nil {
+		logger.Error("Failed to connect to RabbitMQ",
+			slog.String("error", err.Error()),
+		)
+		os.Exit(1)
+	}
+
+	messages, err := subscriber.Subscribe(context.Background(), "example.topic")
+	if err != nil {
+		logger.Error("Unable to subscribe to 'example.topic'",
+			slog.String("error", err.Error()),
+		)
+		panic(err)
+	}
+
+	go process(messages)
 
 	// Instantiate the all application dependencies
 	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
@@ -77,4 +107,11 @@ func main() {
 
 	err = server.ListenAndServe()
 	logger.Error(err.Error())
+}
+
+func process(messages <-chan *message.Message) {
+	for message := range messages {
+		log.Printf("received messages: %s, payload: %s", message.UUID, string(message.Payload))
+		message.Ack()
+	}
 }

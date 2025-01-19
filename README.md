@@ -34,6 +34,7 @@ REDIS_DSN="localhost:6379"
 REDIS_PASSWORD="secret"
 RABBITMQ_DEFAULT_USER="username"
 RABBITMQ_DEFAULT_PASS="password"
+RABBITMQ_URL="amqp://username:password@localhost:5672/"
 EMAIL_HOST="https://sandbox.api.mailtrap.io"
 MAILTRAP_API_KEY="API_KEY"
 ```
