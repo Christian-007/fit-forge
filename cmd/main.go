@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"log"
 	"log/slog"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Christian-007/fit-forge/internal/app/users/dto"
 	"github.com/Christian-007/fit-forge/internal/db"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
@@ -61,10 +63,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	watermillLogger := watermill.NewStdLogger(false, false)
 	amqpConfig := amqp.NewDurableQueueConfig(envVariableService.Get("RABBITMQ_URL"))
+
+	publisher, err := amqp.NewPublisher(amqpConfig, watermillLogger)
+	if err != nil {
+		logger.Error("Failed to create a publisher in RabbitMQ",
+			slog.String("error", err.Error()),
+		)
+		os.Exit(1)
+	}
+	defer publisher.Close()
+
 	subscriber, err := amqp.NewSubscriber(
 		amqpConfig,
-		watermill.NewStdLogger(false, false),
+		watermillLogger,
 	)
 	if err != nil {
 		logger.Error("Failed to connect to RabbitMQ",
@@ -82,6 +95,31 @@ func main() {
 	}
 
 	go process(messages)
+
+	currentTime := time.Now()
+	userResponse := dto.UserResponse{
+		Id:              1,
+		Name:            "John Test",
+		Email:           "johntest@gmail.com",
+		Role:            1,
+		EmailVerifiedAt: &currentTime,
+	}
+
+	payload, err := json.Marshal(userResponse)
+	if err != nil {
+		logger.Error("Failed to Marshal userResponse",
+			slog.String("error", err.Error()),
+		)
+		os.Exit(1)
+	}
+	msg := message.NewMessage(watermill.NewUUID(), payload)
+	err = publisher.Publish("example.topic", msg)
+	if err != nil {
+		logger.Error("Failed to publish a message",
+			slog.String("error", err.Error()),
+		)
+		os.Exit(1)
+	}
 
 	// Instantiate the all application dependencies
 	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
