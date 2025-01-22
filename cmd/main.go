@@ -16,9 +16,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 
 	"github.com/ThreeDotsLabs/watermill"
-	_ "github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
-	_ "github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
 	"github.com/ThreeDotsLabs/watermill/message"
 
 	"github.com/redis/go-redis/v9"
