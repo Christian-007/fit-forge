@@ -6,14 +6,17 @@ import (
 	"net/http"
 	"strconv"
 
-	emaildomain "github.com/Christian-007/fit-forge/internal/app/email/domains"
 	emailservices "github.com/Christian-007/fit-forge/internal/app/email/services"
 	"github.com/Christian-007/fit-forge/internal/app/users/dto"
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
+	"github.com/Christian-007/fit-forge/internal/pkg/topics"
 	"github.com/Christian-007/fit-forge/internal/utils"
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill/message"
 )
 
 type UserHandler struct {
@@ -25,6 +28,7 @@ type UserHandlerOptions struct {
 	Logger         applog.Logger
 	EmailService   emailservices.EmailService
 	MailtrapSender emailservices.MailtrapSender
+	Publisher      *amqp.Publisher
 }
 
 func NewUserHandler(options UserHandlerOptions) UserHandler {
@@ -103,37 +107,20 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	u.Logger.Info("Succefully created a user", slog.String("email", userResponse.Email))
 
-	verificationLink, err := u.EmailService.CreateVerificationLink(userResponse.Email)
+	payload, err := json.Marshal(userResponse)
 	if err != nil {
-		u.Logger.Error(err.Error())
+		u.Logger.Error("Fail to marshal userResponse", slog.String("error:", err.Error()))
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Cannot generate an email verification link"})
 		return
 	}
 
-	emailRequest := emaildomain.EmailWithTemplateRequest{
-		From: emaildomain.EmailAddressOptions{
-			Email: "hello@demomailtrap.com",
-			Name:  "No Reply at Fit Forge",
-		},
-		To: []emaildomain.EmailAddressOptions{
-			{
-				Email: userResponse.Email,
-				Name:  userResponse.Name,
-			},
-		},
-		TemplateUuid: "fdbefad8-2410-45d2-bded-9d1b647ac416",
-		TemplateVariables: map[string]any{
-			"user_name":         userResponse.Name,
-			"verification_link": verificationLink,
-		},
-	}
-	err = u.MailtrapSender.SendWithTemplate(emailRequest)
+	msg := message.NewMessage(watermill.NewUUID(), payload)
+	err = u.Publisher.Publish(topics.UserRegistered, msg)
 	if err != nil {
-		u.Logger.Error(err.Error())
-		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Cannot send an email verification"})
+		u.Logger.Error("Fail to publish UserRegistered", slog.String("error:", err.Error()))
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Cannot generate an email verification link"})
 		return
 	}
-	u.Logger.Info("Succefully send a verification email", slog.String("email", userResponse.Email))
 
 	utils.SendResponse(w, http.StatusOK, userResponse)
 }

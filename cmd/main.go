@@ -2,15 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/Christian-007/fit-forge/internal/app/users/dto"
 	"github.com/Christian-007/fit-forge/internal/db"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
@@ -19,7 +16,6 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
-	"github.com/ThreeDotsLabs/watermill/message"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -65,61 +61,14 @@ func main() {
 
 	watermillLogger := watermill.NewStdLogger(false, false)
 	amqpConfig := amqp.NewDurableQueueConfig(envVariableService.Get("RABBITMQ_URL"))
-
 	publisher, err := amqp.NewPublisher(amqpConfig, watermillLogger)
 	if err != nil {
 		logger.Error("Failed to create a publisher in RabbitMQ",
 			slog.String("error", err.Error()),
 		)
-		os.Exit(1)
-	}
-	defer publisher.Close()
-
-	subscriber, err := amqp.NewSubscriber(
-		amqpConfig,
-		watermillLogger,
-	)
-	if err != nil {
-		logger.Error("Failed to connect to RabbitMQ",
-			slog.String("error", err.Error()),
-		)
-		os.Exit(1)
-	}
-
-	messages, err := subscriber.Subscribe(context.Background(), "example.topic")
-	if err != nil {
-		logger.Error("Unable to subscribe to 'example.topic'",
-			slog.String("error", err.Error()),
-		)
 		panic(err)
 	}
-
-	go process(messages)
-
-	currentTime := time.Now()
-	userResponse := dto.UserResponse{
-		Id:              1,
-		Name:            "John Test",
-		Email:           "johntest@gmail.com",
-		Role:            1,
-		EmailVerifiedAt: &currentTime,
-	}
-
-	payload, err := json.Marshal(userResponse)
-	if err != nil {
-		logger.Error("Failed to Marshal userResponse",
-			slog.String("error", err.Error()),
-		)
-		os.Exit(1)
-	}
-	msg := message.NewMessage(watermill.NewUUID(), payload)
-	err = publisher.Publish("example.topic", msg)
-	if err != nil {
-		logger.Error("Failed to publish a message",
-			slog.String("error", err.Error()),
-		)
-		os.Exit(1)
-	}
+	defer publisher.Close()
 
 	// Instantiate the all application dependencies
 	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
@@ -127,7 +76,21 @@ func main() {
 		Pool:               pool,
 		RedisClient:        client,
 		EnvVariableService: envVariableService,
+		Publisher:          publisher,
 	})
+
+	// Instantiate the PubSub router
+	watermillRouter := NewWatermillRouter(amqpConfig, watermillLogger, appCtx)
+	go func() {
+		logger.Info("starting PubSub router...")
+		err = watermillRouter.Run(context.Background()) // Starting the PubSub router in a Goroutine
+		if err != nil {
+			logger.Error("Failed to start PubSub router",
+				slog.String("error", err.Error()),
+			)
+			panic(err)
+		}
+	}()
 
 	// HTTP Server configurations (Non TLS)
 	server := &http.Server{
@@ -143,11 +106,4 @@ func main() {
 
 	err = server.ListenAndServe()
 	logger.Error(err.Error())
-}
-
-func process(messages <-chan *message.Message) {
-	for message := range messages {
-		log.Printf("received messages: %s, payload: %s", message.UUID, string(message.Payload))
-		message.Ack()
-	}
 }

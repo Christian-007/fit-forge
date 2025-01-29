@@ -34,6 +34,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Logger:         appCtx.Logger,
 		EmailService:   emailService,
 		MailtrapSender: mailtrapSender,
+		Publisher:      appCtx.Publisher,
 	})
 	authService := authservices.NewAuthServiceImpl(authservices.AuthServiceOptions{
 		UserService:        userService,
