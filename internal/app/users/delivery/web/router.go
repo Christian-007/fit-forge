@@ -44,6 +44,9 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 
 	strictSessionMiddleware := middlewares.StrictSession(authService)
 
+	adminRole := 1
+	adminRoleMiddleware := middlewares.Role(adminRole)
+
 	// Public routes
 	r.Group(func(r chi.Router) {
 		r.Post("/", userHandler.Create)
@@ -52,6 +55,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	// Private routes
 	r.Group(func(r chi.Router) {
 		r.Use(strictSessionMiddleware)
+		r.Use(adminRoleMiddleware)
 
 		r.Get("/", userHandler.GetAll)
 		r.Get("/{id}", userHandler.GetOne)
