@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/Christian-007/fit-forge/internal/db"
@@ -18,6 +19,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
 
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -59,6 +61,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create a connection to a Message Broker
 	watermillLogger := watermill.NewStdLogger(false, false)
 	amqpConfig := amqp.NewDurableQueueConfig(envVariableService.Get("RABBITMQ_URL"))
 	publisher, err := amqp.NewPublisher(amqpConfig, watermillLogger)
@@ -79,18 +82,26 @@ func main() {
 		Publisher:          publisher,
 	})
 
+	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer cancel()
+
+	errgrp, ctx := errgroup.WithContext(ctx)
+
 	// Instantiate the PubSub router
 	watermillRouter := NewWatermillRouter(amqpConfig, watermillLogger, appCtx)
-	go func() {
+	errgrp.Go(func() error {
 		logger.Info("starting PubSub router...")
-		err = watermillRouter.Run(context.Background()) // Starting the PubSub router in a Goroutine
+		err = watermillRouter.Run(ctx) // Starting the PubSub router in a Goroutine
 		if err != nil {
 			logger.Error("Failed to start PubSub router",
 				slog.String("error", err.Error()),
 			)
-			panic(err)
+
+			return err
 		}
-	}()
+		return nil
+	})
 
 	// HTTP Server configurations (Non TLS)
 	server := &http.Server{
@@ -102,8 +113,28 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	logger.Info("starting server", "addr", *addr)
+	errgrp.Go(func() error {
+		// We don't want to start the HTTP server before Watermill router (so service won't be healthy before it's ready)
+		<-watermillRouter.Running()
 
-	err = server.ListenAndServe()
-	logger.Error(err.Error())
+		logger.Info("starting server", "addr", *addr)
+
+		err = server.ListenAndServe()
+		if err != nil {
+			logger.Error(err.Error())
+			return err
+		}
+
+		return nil
+	})
+
+	errgrp.Go(func() error {
+		<-ctx.Done()
+		return server.Shutdown(ctx)
+	})
+
+	err = errgrp.Wait()
+	if err != nil {
+		panic(err)
+	}
 }
