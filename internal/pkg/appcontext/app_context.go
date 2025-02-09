@@ -4,7 +4,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
-	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,7 +17,7 @@ type AppContextOptions struct {
 	Pool               *pgxpool.Pool
 	RedisClient        *cache.RedisCache
 	EnvVariableService envvariable.EnvVariableService
-	Publisher          *amqp.Publisher
+	Publisher          message.Publisher
 }
 
 func NewAppContext(options AppContextOptions) AppContext {

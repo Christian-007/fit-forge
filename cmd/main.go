@@ -13,6 +13,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
+	"github.com/Christian-007/fit-forge/internal/pkg/decorator"
 	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 
 	"github.com/ThreeDotsLabs/watermill"
@@ -64,7 +65,9 @@ func main() {
 	// Create a connection to a Message Broker
 	watermillLogger := watermill.NewStdLogger(false, false)
 	amqpConfig := amqp.NewDurableQueueConfig(envVariableService.Get("RABBITMQ_URL"))
-	publisher, err := amqp.NewPublisher(amqpConfig, watermillLogger)
+	amqpPublisher, err := amqp.NewPublisher(amqpConfig, watermillLogger)
+	publisher := decorator.PublishWithCorrelationId{Publisher: amqpPublisher}
+
 	if err != nil {
 		logger.Error("Failed to create a publisher in RabbitMQ",
 			slog.String("error", err.Error()),

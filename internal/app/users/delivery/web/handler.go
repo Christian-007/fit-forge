@@ -15,7 +15,6 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/topics"
 	"github.com/Christian-007/fit-forge/internal/utils"
 	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
 	"github.com/ThreeDotsLabs/watermill/message"
 )
 
@@ -28,7 +27,7 @@ type UserHandlerOptions struct {
 	Logger         applog.Logger
 	EmailService   emailservices.EmailService
 	MailtrapSender emailservices.MailtrapSender
-	Publisher      *amqp.Publisher
+	Publisher      message.Publisher
 }
 
 func NewUserHandler(options UserHandlerOptions) UserHandler {
