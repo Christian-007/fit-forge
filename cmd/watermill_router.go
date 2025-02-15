@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"time"
 
 	emailpubsub "github.com/Christian-007/fit-forge/internal/app/email/delivery/pubsub"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
@@ -9,6 +10,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
 )
 
 func NewWatermillRouter(amqpConfig amqp.Config, watermillLogger watermill.LoggerAdapter, appCtx appcontext.AppContext) *message.Router {
@@ -19,6 +21,15 @@ func NewWatermillRouter(amqpConfig amqp.Config, watermillLogger watermill.Logger
 		)
 		panic(err)
 	}
+
+	// Exponential backoff
+	router.AddMiddleware(middleware.Retry{
+		MaxRetries:      5,
+		InitialInterval: time.Millisecond * 500,
+		MaxInterval:     time.Second * 30,
+		Multiplier:      2,
+		Logger:          watermillLogger,
+	}.Middleware)
 
 	router.AddMiddleware(func(next message.HandlerFunc) message.HandlerFunc {
 		return func(msg *message.Message) ([]*message.Message, error) {
