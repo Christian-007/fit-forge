@@ -1,11 +1,15 @@
 package main
 
 import (
+	"net/http"
+
 	authweb "github.com/Christian-007/fit-forge/internal/app/auth/delivery/web"
 	todosweb "github.com/Christian-007/fit-forge/internal/app/todos/delivery/web"
 	usersweb "github.com/Christian-007/fit-forge/internal/app/users/delivery/web"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
+	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	"github.com/Christian-007/fit-forge/internal/pkg/middlewares"
+	"github.com/Christian-007/fit-forge/internal/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
@@ -21,6 +25,10 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 	}))
+
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		utils.SendResponse(w, http.StatusOK, apphttp.ErrorResponse{Message: "Ok"})
+	})
 
 	r.Mount("/users", usersweb.Routes(appCtx))
 	r.Mount("/todos", todosweb.Routes(appCtx))
