@@ -25,6 +25,9 @@ migrate_up_all: validate_env
 migrate_down_all: validate_env
 	migrate -path migrations -database "postgresql://${DB_USER}:${POSTGRES_PASSWORD}@localhost:5433/fit_forge?sslmode=disable" -verbose down
 
+migrate_up_1: validate_env
+	migrate -path migrations -database "postgresql://${DB_USER}:${POSTGRES_PASSWORD}@localhost:5433/fit_forge?sslmode=disable" -verbose up 1
+
 migrate_down_1: validate_env
 	migrate -path migrations -database "postgresql://${DB_USER}:${POSTGRES_PASSWORD}@localhost:5433/fit_forge?sslmode=disable" -verbose down 1
 
@@ -32,4 +35,4 @@ unit_test_coverage:
 	@go test -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out
 
-.PHONY: run_db_container start_db stop_db create_db drop_db migrate_up_all migrate_down_all migrate_down_1 unit_test_coverage
+.PHONY: run_db_container start_db stop_db create_db drop_db migrate_up_all migrate_down_all migrate_up_1 migrate_down_1 unit_test_coverage
