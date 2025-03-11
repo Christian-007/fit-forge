@@ -111,7 +111,7 @@ func (a AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 		a.Logger.Error(err.Error())
 
 		if err == apperrors.ErrRedisKeyNotFound {
-			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Token not found"})	
+			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Token not found"})
 			return
 		}
 
