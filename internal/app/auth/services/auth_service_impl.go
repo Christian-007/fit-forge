@@ -13,7 +13,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/twinj/uuid"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -55,7 +55,7 @@ func (a AuthServiceImpl) Authenticate(loginRequest authdto.LoginRequest) (userdt
 
 func (a AuthServiceImpl) CreateToken(userId int) (domains.AuthToken, error) {
 	authToken := domains.AuthToken{}
-	uuid := uuid.NewV4().String()
+	uuid := uuid.NewString()
 	secretKey := []byte(a.EnvVariableService.Get("AUTH_SECRET_KEY"))
 	expiresAt := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 	claims := domains.Claims{
