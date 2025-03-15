@@ -3,8 +3,10 @@ package repositories
 import (
 	"context"
 
+	pointdomains "github.com/Christian-007/fit-forge/internal/app/points/domains"
 	"github.com/Christian-007/fit-forge/internal/app/users/domains"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -82,6 +84,72 @@ func (u UserRepositoryPg) Create(user domains.UserModel) (domains.UserModel, err
 	)
 	if err != nil {
 		return domains.UserModel{}, err
+	}
+
+	return insertedUser, nil
+}
+
+func (u UserRepositoryPg) CreateWithInitialPoints(ctx context.Context, user domains.UserModel) (domains.UserWithPoints, error) {
+	tx, err := u.db.Begin(ctx)
+	if err != nil {
+		return domains.UserWithPoints{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	var row pgx.Row
+
+	// Step 1: Create user
+	var insertedUser domains.UserWithPoints
+	query := "INSERT INTO users(name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, password, role, email_verified_at, created_at"
+	row = tx.QueryRow(ctx, query, user.Name, user.Email, user.Password)
+	err = row.Scan(
+		&insertedUser.Id,
+		&insertedUser.Name,
+		&insertedUser.Email,
+		&insertedUser.Password,
+		&insertedUser.Role,
+		&insertedUser.EmailVerifiedAt,
+		&insertedUser.CreatedAt,
+	)
+	if err != nil {
+		return domains.UserWithPoints{}, err
+	}
+
+	// Step 2: Insert the initial point
+	var insertedPoint pointdomains.PointModel
+	earnedPoints := 100
+	query = "INSERT INTO points(user_id, total_points) VALUES ($1, $2) RETURNING user_id, total_points, created_at, updated_at"
+	row = tx.QueryRow(ctx, query, insertedUser.Id, earnedPoints)
+	err = row.Scan(
+		&insertedPoint.UserId,
+		&insertedPoint.TotalPoints,
+		&insertedPoint.CreatedAt,
+		&insertedPoint.UpdatedAt,
+	)
+	if err != nil {
+		return domains.UserWithPoints{}, err
+	}
+
+	// Step 3: Log to the point transaction
+	pointTransactions := pointdomains.PointTransactionsModel{
+		ID:              uuid.New(),
+		TransactionType: pointdomains.EarnTransactionType,
+		Points:          earnedPoints,
+		Reason:          "user registration",
+		UserID:          insertedUser.Id,
+	}
+	query = "INSERT INTO point_transactions(id, transaction_type, points, reason, user_id) VALUES ($1, $2, $3, $4, $5), RETURNING id, transaction_type, points, reason, user_id, created_at"
+	_, err = tx.Exec(ctx, query, pointTransactions.ID, pointTransactions.TransactionType, pointTransactions.Points, pointTransactions.Reason, pointTransactions.UserID)
+	if err != nil {
+		return domains.UserWithPoints{}, err
+	}
+
+	// Step 4: Add the inserted points to the user model
+	insertedUser.Point = insertedPoint
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return domains.UserWithPoints{}, err
 	}
 
 	return insertedUser, nil
