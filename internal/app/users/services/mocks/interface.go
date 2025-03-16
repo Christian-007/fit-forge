@@ -10,6 +10,7 @@
 package mock_services
 
 import (
+	context "context"
 	reflect "reflect"
 
 	dto "github.com/Christian-007/fit-forge/internal/app/users/dto"
@@ -53,6 +54,21 @@ func (m *MockUserService) Create(createUserRequest dto.CreateUserRequest) (dto.U
 func (mr *MockUserServiceMockRecorder) Create(createUserRequest any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserService)(nil).Create), createUserRequest)
+}
+
+// CreateWithInitialPoints mocks base method.
+func (m *MockUserService) CreateWithInitialPoints(ctx context.Context, createUserRequest dto.CreateUserRequest) (dto.UserWithPointsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateWithInitialPoints", ctx, createUserRequest)
+	ret0, _ := ret[0].(dto.UserWithPointsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateWithInitialPoints indicates an expected call of CreateWithInitialPoints.
+func (mr *MockUserServiceMockRecorder) CreateWithInitialPoints(ctx, createUserRequest any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithInitialPoints", reflect.TypeOf((*MockUserService)(nil).CreateWithInitialPoints), ctx, createUserRequest)
 }
 
 // Delete mocks base method.

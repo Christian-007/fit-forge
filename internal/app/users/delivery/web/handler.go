@@ -92,7 +92,7 @@ func (u UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// If yes, then proceed to overwrite the old with the new data
 	// and proceed to send the email verification again.
 
-	userResponse, err := u.UserService.Create(createUserRequest)
+	userResponse, err := u.UserService.CreateWithInitialPoints(r.Context(), createUserRequest)
 	if err != nil {
 		u.Logger.Error(err.Error())
 

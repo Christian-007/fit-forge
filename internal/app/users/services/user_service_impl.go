@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 
 	"github.com/Christian-007/fit-forge/internal/app/users/domains"
@@ -104,6 +105,36 @@ func (u UserServiceImpl) Create(createUserRequest dto.CreateUserRequest) (dto.Us
 	return dto.UserResponse{}, err // default error
 }
 
+func (u UserServiceImpl) CreateWithInitialPoints(ctx context.Context, createUserRequest dto.CreateUserRequest) (dto.UserWithPointsResponse, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createUserRequest.Password), 12)
+	if err != nil {
+		return dto.UserWithPointsResponse{}, err
+	}
+
+	userModel := domains.UserModel{
+		Name:     createUserRequest.Name,
+		Email:    createUserRequest.Email,
+		Password: hashedPassword,
+	}
+
+	createdUserWithPoints, err := u.UserRepository.CreateWithInitialPoints(ctx, userModel)
+	if err == nil {
+		return toUserWithPointsResponse(createdUserWithPoints), nil
+	}
+
+	pgxErr, ok := err.(*pgconn.PgError)
+	if !ok || pgxErr.Code != "23505" {
+		return dto.UserWithPointsResponse{}, err
+	}
+
+	// Unique constraint violation ("23505") errors
+	if pgxErr.ConstraintName == "users_email_key" {
+		return dto.UserWithPointsResponse{}, apperrors.ErrEmailDuplicate
+	}
+
+	return dto.UserWithPointsResponse{}, err
+}
+
 func (u UserServiceImpl) Delete(id int) error {
 	err := u.UserRepository.Delete(id)
 	if err != nil {
@@ -187,5 +218,16 @@ func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 		Email:           userModel.Email,
 		Role:            userModel.Role,
 		EmailVerifiedAt: userModel.EmailVerifiedAt,
+	}
+}
+
+func toUserWithPointsResponse(userWithPointsModel domains.UserWithPoints) dto.UserWithPointsResponse {
+	return dto.UserWithPointsResponse{
+		Id:              userWithPointsModel.Id,
+		Name:            userWithPointsModel.Name,
+		Email:           userWithPointsModel.Email,
+		Role:            userWithPointsModel.Role,
+		EmailVerifiedAt: userWithPointsModel.EmailVerifiedAt,
+		Point:           userWithPointsModel.Point,
 	}
 }

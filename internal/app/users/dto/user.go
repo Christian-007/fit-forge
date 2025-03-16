@@ -3,6 +3,7 @@ package dto
 import (
 	"time"
 
+	"github.com/Christian-007/fit-forge/internal/app/points/domains"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -13,6 +14,15 @@ type UserResponse struct {
 	Email           string     `json:"email"`
 	Role            int        `json:"role"`
 	EmailVerifiedAt *time.Time `json:"emailVerifiedAt"`
+}
+
+type UserWithPointsResponse struct {
+	Id              int                `json:"id"`
+	Name            string             `json:"name"`
+	Email           string             `json:"email"`
+	Role            int                `json:"role"`
+	EmailVerifiedAt *time.Time         `json:"emailVerifiedAt"`
+	Point           domains.PointModel `json:"point"`
 }
 
 type GetUserByEmailResponse struct {

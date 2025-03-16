@@ -138,7 +138,7 @@ func (u UserRepositoryPg) CreateWithInitialPoints(ctx context.Context, user doma
 		Reason:          "user registration",
 		UserID:          insertedUser.Id,
 	}
-	query = "INSERT INTO point_transactions(id, transaction_type, points, reason, user_id) VALUES ($1, $2, $3, $4, $5), RETURNING id, transaction_type, points, reason, user_id, created_at"
+	query = "INSERT INTO point_transactions(id, transaction_type, points, reason, user_id) VALUES ($1, $2, $3, $4, $5)"
 	_, err = tx.Exec(ctx, query, pointTransactions.ID, pointTransactions.TransactionType, pointTransactions.Points, pointTransactions.Reason, pointTransactions.UserID)
 	if err != nil {
 		return domains.UserWithPoints{}, err
