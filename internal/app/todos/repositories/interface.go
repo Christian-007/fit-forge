@@ -1,6 +1,10 @@
 package repositories
 
-import "github.com/Christian-007/fit-forge/internal/app/todos/domains"
+import (
+	"context"
+
+	"github.com/Christian-007/fit-forge/internal/app/todos/domains"
+)
 
 //go:generate mockgen -source=interface.go -destination=mocks/interface.go
 type TodoRepository interface {
@@ -8,5 +12,6 @@ type TodoRepository interface {
 	GetAllByUserId(userId int) ([]domains.TodoModel, error)
 	GetOneByUserId(userId int, todoId int) (domains.TodoModel, error)
 	Create(userId int, todo domains.TodoModel) (domains.TodoModel, error)
+	CreateWithPoints(ctx context.Context, userId int, todo domains.TodoModel) (domains.TodoWithPoints, error)
 	Delete(todoId int, userId int) error
 }

@@ -135,7 +135,7 @@ func (u UserRepositoryPg) CreateWithInitialPoints(ctx context.Context, user doma
 		ID:              uuid.New(),
 		TransactionType: pointdomains.EarnTransactionType,
 		Points:          earnedPoints,
-		Reason:          "user registration",
+		Reason:          pointdomains.UserRegistrationReason,
 		UserID:          insertedUser.Id,
 	}
 	query = "INSERT INTO point_transactions(id, transaction_type, points, reason, user_id) VALUES ($1, $2, $3, $4, $5)"

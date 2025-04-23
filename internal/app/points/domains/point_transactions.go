@@ -10,7 +10,7 @@ type PointTransactionsModel struct {
 	ID              uuid.UUID       `json:"id"`
 	TransactionType TransactionType `json:"transaction_type"`
 	Points          int             `json:"points"`
-	Reason          string          `json:"reason"`
+	Reason          Reason          `json:"reason"`
 	UserID          int             `json:"user_id"`
 	CreatedAt       time.Time       `json:"created_at"`
 }
@@ -21,4 +21,11 @@ const (
 	EarnTransactionType   TransactionType = "earn"
 	SpendTransactionType  TransactionType = "spend"
 	ExpireTransactionType TransactionType = "expire"
+)
+
+type Reason string
+
+const (
+	UserRegistrationReason Reason = "user registration"
+	CreateTodoReason       Reason = "create todo"
 )

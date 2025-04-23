@@ -10,6 +10,7 @@
 package mock_repositories
 
 import (
+	context "context"
 	reflect "reflect"
 
 	domains "github.com/Christian-007/fit-forge/internal/app/todos/domains"
@@ -52,6 +53,21 @@ func (m *MockTodoRepository) Create(userId int, todo domains.TodoModel) (domains
 func (mr *MockTodoRepositoryMockRecorder) Create(userId, todo any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTodoRepository)(nil).Create), userId, todo)
+}
+
+// CreateWithPoints mocks base method.
+func (m *MockTodoRepository) CreateWithPoints(ctx context.Context, userId int, todo domains.TodoModel) (domains.TodoWithPoints, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateWithPoints", ctx, userId, todo)
+	ret0, _ := ret[0].(domains.TodoWithPoints)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateWithPoints indicates an expected call of CreateWithPoints.
+func (mr *MockTodoRepositoryMockRecorder) CreateWithPoints(ctx, userId, todo any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithPoints", reflect.TypeOf((*MockTodoRepository)(nil).CreateWithPoints), ctx, userId, todo)
 }
 
 // Delete mocks base method.
