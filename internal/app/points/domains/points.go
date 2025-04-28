@@ -8,3 +8,8 @@ type PointModel struct {
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt   time.Time `json:"updatedAt"`
 }
+
+type PointChange struct {
+	Total  int    `json:"total"`
+	Change string `json:"change"`
+}

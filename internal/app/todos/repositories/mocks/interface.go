@@ -21,6 +21,7 @@ import (
 type MockTodoRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockTodoRepositoryMockRecorder
+	isgomock struct{}
 }
 
 // MockTodoRepositoryMockRecorder is the mock recorder for MockTodoRepository.
@@ -56,18 +57,18 @@ func (mr *MockTodoRepositoryMockRecorder) Create(userId, todo any) *gomock.Call 
 }
 
 // CreateWithPoints mocks base method.
-func (m *MockTodoRepository) CreateWithPoints(ctx context.Context, userId int, todo domains.TodoModel) (domains.TodoWithPoints, error) {
+func (m *MockTodoRepository) CreateWithPoints(ctx context.Context, todo domains.TodoModel, userId int) (domains.TodoModelWithPoints, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateWithPoints", ctx, userId, todo)
-	ret0, _ := ret[0].(domains.TodoWithPoints)
+	ret := m.ctrl.Call(m, "CreateWithPoints", ctx, todo, userId)
+	ret0, _ := ret[0].(domains.TodoModelWithPoints)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateWithPoints indicates an expected call of CreateWithPoints.
-func (mr *MockTodoRepositoryMockRecorder) CreateWithPoints(ctx, userId, todo any) *gomock.Call {
+func (mr *MockTodoRepositoryMockRecorder) CreateWithPoints(ctx, todo, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithPoints", reflect.TypeOf((*MockTodoRepository)(nil).CreateWithPoints), ctx, userId, todo)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithPoints", reflect.TypeOf((*MockTodoRepository)(nil).CreateWithPoints), ctx, todo, userId)
 }
 
 // Delete mocks base method.

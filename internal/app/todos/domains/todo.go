@@ -14,11 +14,11 @@ type TodoModel struct {
 	CreatedAt   time.Time
 }
 
-type TodoWithPoints struct {
-	Id          int
-	Title       string
-	IsCompleted bool
-	UserId      int
-	CreatedAt   time.Time
-	Point       domains.PointModel `json:"point"`
+type TodoModelWithPoints struct {
+	Id          int                 `json:"id"`
+	Title       string              `json:"title"`
+	IsCompleted bool                `json:"isCompleted"`
+	UserId      int                 `json:"userId"`
+	CreatedAt   time.Time           `json:"createdAt"`
+	Points      domains.PointChange `json:"points"`
 }

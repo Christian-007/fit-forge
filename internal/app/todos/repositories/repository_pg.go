@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	pointdomains "github.com/Christian-007/fit-forge/internal/app/points/domains"
 	"github.com/Christian-007/fit-forge/internal/app/todos/domains"
@@ -83,17 +84,17 @@ func (t TodoRepositoryPg) Create(userId int, todo domains.TodoModel) (domains.To
 	return insertedTodo, nil
 }
 
-func (t TodoRepositoryPg) CreateWithPoints(ctx context.Context, userId int, todo domains.TodoModel) (domains.TodoWithPoints, error) {
+func (t TodoRepositoryPg) CreateWithPoints(ctx context.Context, todo domains.TodoModel, userId int) (domains.TodoModelWithPoints, error) {
 	tx, err := t.db.Begin(ctx)
 	if err != nil {
-		return domains.TodoWithPoints{}, err
+		return domains.TodoModelWithPoints{}, err
 	}
 	defer tx.Rollback(ctx)
 
 	var row pgx.Row
 
 	// Step 1: Create todo
-	var insertedTodo domains.TodoWithPoints
+	var insertedTodo domains.TodoModelWithPoints
 	query := "INSERT INTO todos(user_id, title) VALUES ($1, $2) RETURNING *"
 	row = tx.QueryRow(ctx, query, userId, todo.Title)
 	err = row.Scan(
@@ -104,44 +105,47 @@ func (t TodoRepositoryPg) CreateWithPoints(ctx context.Context, userId int, todo
 		&insertedTodo.CreatedAt,
 	)
 	if err != nil {
-		return domains.TodoWithPoints{}, err
+		return domains.TodoModelWithPoints{}, err
 	}
 
-	// Step 2: Insert points
+	// Step 2: Add points by updating the existing point
 	var insertedPoint pointdomains.PointModel
-	earnedPoints := 2
-	query = "INSERT INTO points(user_id, total_points) VALUES ($1, $2) RETURNING user_id, total_points, created_at, updated_at"
-	row = tx.QueryRow(ctx, query, insertedTodo.UserId, earnedPoints)
-	err = row.Scan(
-		&insertedPoint.UserId,
-		&insertedPoint.TotalPoints,
-		&insertedPoint.CreatedAt,
-		&insertedPoint.UpdatedAt,
-	)
+	addedPoints := 2
+	query = `
+		UPDATE points 
+		SET
+			total_points = total_points + $1,
+		WHERE user_id = $2
+		RETURNING user_id, total_points
+	`
+	row = tx.QueryRow(ctx, query, addedPoints, userId)
+	err = row.Scan(&insertedPoint.UserId, &insertedPoint.TotalPoints)
 	if err != nil {
-		return domains.TodoWithPoints{}, err
+		return domains.TodoModelWithPoints{}, err
 	}
 
 	// Step 3: Log to the point transaction
 	pointTransactions := pointdomains.PointTransactionsModel{
 		ID:              uuid.New(),
 		TransactionType: pointdomains.EarnTransactionType,
-		Points:          earnedPoints,
-		Reason:          pointdomains.CreateTodoReason,
-		UserID:          insertedTodo.UserId,
+		Points:          addedPoints,
+		Reason:          "created a todo",
+		UserID:          userId,
 	}
 	query = "INSERT INTO point_transactions(id, transaction_type, points, reason, user_id) VALUES ($1, $2, $3, $4, $5)"
 	_, err = tx.Exec(ctx, query, pointTransactions.ID, pointTransactions.TransactionType, pointTransactions.Points, pointTransactions.Reason, pointTransactions.UserID)
 	if err != nil {
-		return domains.TodoWithPoints{}, err
+		return domains.TodoModelWithPoints{}, err
 	}
 
-	// Step 4: Add the inserted points to the user model
-	insertedTodo.Point = insertedPoint
-
+	// Step 4: Add the inserted points to the todo model
+	insertedTodo.Points = pointdomains.PointChange{
+		Total:  insertedPoint.TotalPoints,
+		Change: fmt.Sprintf("+%d", addedPoints),
+	}
 	err = tx.Commit(ctx)
 	if err != nil {
-		return domains.TodoWithPoints{}, err
+		return domains.TodoModelWithPoints{}, err
 	}
 
 	return insertedTodo, nil

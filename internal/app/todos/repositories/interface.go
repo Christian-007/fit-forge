@@ -12,6 +12,6 @@ type TodoRepository interface {
 	GetAllByUserId(userId int) ([]domains.TodoModel, error)
 	GetOneByUserId(userId int, todoId int) (domains.TodoModel, error)
 	Create(userId int, todo domains.TodoModel) (domains.TodoModel, error)
-	CreateWithPoints(ctx context.Context, userId int, todo domains.TodoModel) (domains.TodoWithPoints, error)
+	CreateWithPoints(ctx context.Context, todo domains.TodoModel, userId int) (domains.TodoModelWithPoints, error)
 	Delete(todoId int, userId int) error
 }
