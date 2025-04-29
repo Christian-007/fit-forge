@@ -114,7 +114,7 @@ func (t TodoRepositoryPg) CreateWithPoints(ctx context.Context, todo domains.Tod
 	query = `
 		UPDATE points 
 		SET
-			total_points = total_points + $1,
+			total_points = total_points + $1
 		WHERE user_id = $2
 		RETURNING user_id, total_points
 	`

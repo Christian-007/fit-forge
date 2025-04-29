@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 
 	"github.com/Christian-007/fit-forge/internal/app/todos/domains"
@@ -77,6 +78,19 @@ func (t TodoService) Create(userId int, createTodoRequest dto.CreateTodoRequest)
 	return toTodoResponse(createdTodoModel), nil
 }
 
+func (t TodoService) CreateWithPoints(ctx context.Context, userId int, createTodoRequest dto.CreateTodoRequest) (dto.TodoWithPointsResponse, error) {
+	todoModel := domains.TodoModel{
+		Title: createTodoRequest.Title,
+	}
+
+	createdTodoModel, err := t.TodoRepository.CreateWithPoints(ctx, todoModel, userId)
+	if err != nil {
+		return dto.TodoWithPointsResponse{}, err
+	}
+
+	return toTodoWithPointsResponse(createdTodoModel), nil
+}
+
 func (t TodoService) Delete(todoId int, userId int) error {
 	err := t.TodoRepository.Delete(todoId, userId)
 	if err != nil {
@@ -91,6 +105,15 @@ func toTodoResponse(todoModel domains.TodoModel) dto.TodoResponse {
 		Id:          todoModel.Id,
 		Title:       todoModel.Title,
 		IsCompleted: todoModel.IsCompleted,
+	}
+}
+
+func toTodoWithPointsResponse(todoModel domains.TodoModelWithPoints) dto.TodoWithPointsResponse {
+	return dto.TodoWithPointsResponse{
+		Id:          todoModel.Id,
+		Title:       todoModel.Title,
+		IsCompleted: todoModel.IsCompleted,
+		Points:      todoModel.Points,
 	}
 }
 

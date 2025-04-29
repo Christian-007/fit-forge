@@ -117,7 +117,7 @@ func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todoResponse, err := t.TodoService.Create(userId, createTodoRequest)
+	todoResponse, err := t.TodoService.CreateWithPoints(r.Context(), userId, createTodoRequest)
 	if err != nil {
 		t.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
