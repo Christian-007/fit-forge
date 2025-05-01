@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	pointdomains "github.com/Christian-007/fit-forge/internal/app/points/domains"
 	"github.com/Christian-007/fit-forge/internal/app/todos/domains"
@@ -161,6 +162,28 @@ func (t TodoRepositoryPg) Delete(todoId int, userId int) error {
 
 	if cmdTag.RowsAffected() == 0 {
 		return apperrors.ErrUserOrTodoNotFound
+	}
+
+	return nil
+}
+
+func (t TodoRepositoryPg) Update(ctx context.Context, todoId int, updates map[string]any) error {
+	var (
+		setClauses []string
+		args       []any
+		i          = 1
+	)
+
+	for field, value := range updates {
+		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", field, i))
+		args = append(args, value)
+		i++
+	}
+
+	query := fmt.Sprintf("UPDATE todos SET %s WHERE id = %d", strings.Join(setClauses, ", "), todoId)
+	_, err := t.db.Exec(ctx, query, args...)
+	if err != nil {
+		return err
 	}
 
 	return nil

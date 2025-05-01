@@ -129,3 +129,17 @@ func (mr *MockTodoRepositoryMockRecorder) GetOneByUserId(userId, todoId any) *go
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOneByUserId", reflect.TypeOf((*MockTodoRepository)(nil).GetOneByUserId), userId, todoId)
 }
+
+// Update mocks base method.
+func (m *MockTodoRepository) Update(ctx context.Context, todoId int, updates map[string]any) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, todoId, updates)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockTodoRepositoryMockRecorder) Update(ctx, todoId, updates any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTodoRepository)(nil).Update), ctx, todoId, updates)
+}

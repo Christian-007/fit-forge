@@ -14,4 +14,5 @@ type TodoRepository interface {
 	Create(userId int, todo domains.TodoModel) (domains.TodoModel, error)
 	CreateWithPoints(ctx context.Context, todo domains.TodoModel, userId int) (domains.TodoModelWithPoints, error)
 	Delete(todoId int, userId int) error
+	Update(ctx context.Context, todoId int, updates map[string]any) error
 }
