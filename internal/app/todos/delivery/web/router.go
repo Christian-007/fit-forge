@@ -42,6 +42,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		r.Get("/{id}", todoHandler.GetOne)
 		r.Post("/", todoHandler.Create)
 		r.Delete("/{id}", todoHandler.Delete)
+		r.Patch("/{id}", todoHandler.Patch)
 	})
 
 	// Routes that can only be accessed by Admin role

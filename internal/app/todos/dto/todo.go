@@ -32,6 +32,11 @@ type CreateTodoRequest struct {
 	Title string `json:"title"`
 }
 
+type UpdateTodoRequest struct {
+	Title       *string `json:"title"`
+	IsCompleted *bool   `json:"isCompleted"`
+}
+
 func (c CreateTodoRequest) Validate() error {
 	return validation.ValidateStruct(&c, validation.Field(&c.Title, validation.Required))
 }

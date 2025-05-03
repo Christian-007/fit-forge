@@ -100,6 +100,28 @@ func (t TodoService) Delete(todoId int, userId int) error {
 	return nil
 }
 
+func (t TodoService) Update(ctx context.Context, todoId int, updateTodoReq dto.UpdateTodoRequest) error {
+	updates := constructUpdateRequest(updateTodoReq)
+	err := t.TodoRepository.Update(ctx, todoId, updates)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func constructUpdateRequest(updateTodoReq dto.UpdateTodoRequest) map[string]any {
+	updates := make(map[string]any) // the key format is based on the db column
+	if updateTodoReq.Title != nil {
+		updates["title"] = updateTodoReq.Title
+	}
+	if updateTodoReq.IsCompleted != nil {
+		updates["is_completed"] = updateTodoReq.IsCompleted
+	}
+
+	return updates
+}
+
 func toTodoResponse(todoModel domains.TodoModel) dto.TodoResponse {
 	return dto.TodoResponse{
 		Id:          todoModel.Id,

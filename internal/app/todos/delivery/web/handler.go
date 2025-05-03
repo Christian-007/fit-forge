@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -119,7 +120,9 @@ func (t TodoHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	todoResponse, err := t.TodoService.CreateWithPoints(r.Context(), userId, createTodoRequest)
 	if err != nil {
-		t.Logger.Error(err.Error())
+		t.Logger.Error("Unable to create a todo",
+			slog.String("error", err.Error()),
+		)
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
@@ -156,4 +159,35 @@ func (t TodoHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+// TODO: add validations and publish complete todo if completed
+func (t TodoHandler) Patch(w http.ResponseWriter, r *http.Request) {
+	todoId, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		t.Logger.Error(err.Error())
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "Todo ID is invalid"})
+		return
+	}
+
+	var updateTodoReq dto.UpdateTodoRequest
+	err = json.NewDecoder(r.Body).Decode(&updateTodoReq)
+	if err != nil {
+		t.Logger.Error("Error unmarshalling update todo request",
+			slog.String("error", err.Error()),
+		)
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	err = t.TodoService.Update(r.Context(), todoId, updateTodoReq)
+	if err != nil {
+		t.Logger.Error("Error updating todo",
+			slog.String("error", err.Error()),
+		)
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
