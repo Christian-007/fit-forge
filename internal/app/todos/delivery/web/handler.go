@@ -180,6 +180,23 @@ func (t TodoHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate if the update request is empty
+	if (updateTodoReq == dto.UpdateTodoRequest{}) {
+		t.Logger.Error("Error validations",
+			slog.String("error", "Update request cannot be empty"),
+		)
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "Bad Request"})
+		return
+	}
+
+	if err = updateTodoReq.Validate(); err != nil {
+		t.Logger.Error("Error validations",
+			slog.String("error", err.Error()),
+		)
+		utils.SendResponse(w, http.StatusBadRequest, apphttp.ErrorResponse{Message: "Bad Request"})
+		return
+	}
+
 	err = t.TodoService.Update(r.Context(), todoId, updateTodoReq)
 	if err != nil {
 		t.Logger.Error("Error updating todo",

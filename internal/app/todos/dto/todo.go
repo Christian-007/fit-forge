@@ -32,11 +32,27 @@ type CreateTodoRequest struct {
 	Title string `json:"title"`
 }
 
+func (c CreateTodoRequest) Validate() error {
+	return validation.ValidateStruct(&c, validation.Field(&c.Title, validation.Required))
+}
+
 type UpdateTodoRequest struct {
 	Title       *string `json:"title"`
 	IsCompleted *bool   `json:"isCompleted"`
 }
 
-func (c CreateTodoRequest) Validate() error {
-	return validation.ValidateStruct(&c, validation.Field(&c.Title, validation.Required))
+func (u UpdateTodoRequest) Validate() error {
+	return validation.ValidateStruct(&u,
+		validation.Field(&u.Title,
+			validation.NilOrNotEmpty,
+			validation.When(u.Title != nil, validation.Length(1, 200)),
+		),
+		validation.Field(&u.IsCompleted,
+			validation.NilOrNotEmpty,
+		),
+	)
+}
+
+func (u UpdateTodoRequest) IsCompletedTrue() bool {
+	return u.IsCompleted != nil && *u.IsCompleted
 }
