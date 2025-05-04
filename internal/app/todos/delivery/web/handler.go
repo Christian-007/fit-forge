@@ -12,7 +12,10 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/apphttp"
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
+	"github.com/Christian-007/fit-forge/internal/pkg/topics"
 	"github.com/Christian-007/fit-forge/internal/utils"
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
 )
 
 type TodoHandler struct {
@@ -22,6 +25,7 @@ type TodoHandler struct {
 type TodoHandlerOptions struct {
 	TodoService services.TodoService
 	Logger      applog.Logger
+	Publisher   message.Publisher
 }
 
 func NewTodoHandler(options TodoHandlerOptions) TodoHandler {
@@ -204,6 +208,25 @@ func (t TodoHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		)
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
+	}
+
+	t.Logger.Info("Successfully completed a todo", slog.Int("todoId", todoId))
+
+	// Publish "TodoCompleted" topic when completing a todo
+	if updateTodoReq.IsCompletedTrue() {
+		userId, ok := requestctx.UserId(r.Context())
+		if !ok {
+			t.Logger.Error(apperrors.ErrTypeAssertion.Error())
+			utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+			return
+		}
+
+		msg := message.NewMessage(watermill.NewUUID(), []byte(strconv.Itoa(userId)))
+		err = t.Publisher.Publish(topics.TodoCompleted, msg)
+		// If there is an unexpected error, it's decided to not send any http error response
+		if err != nil {
+			t.Logger.Error("Fail to publish TodoCompleted", slog.String("error:", err.Error()))
+		}
 	}
 
 	w.WriteHeader(http.StatusNoContent)
