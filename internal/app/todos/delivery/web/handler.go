@@ -210,7 +210,7 @@ func (t TodoHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t.Logger.Info("Successfully completed a todo", slog.Int("todoId", todoId))
+	t.Logger.Info("Successfully updated a todo", slog.Int("todoId", todoId))
 
 	// Publish "TodoCompleted" topic when completing a todo
 	if updateTodoReq.IsCompletedTrue() {

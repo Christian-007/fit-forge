@@ -47,9 +47,7 @@ func (u UpdateTodoRequest) Validate() error {
 			validation.NilOrNotEmpty,
 			validation.When(u.Title != nil, validation.Length(1, 200)),
 		),
-		validation.Field(&u.IsCompleted,
-			validation.NilOrNotEmpty,
-		),
+		validation.Field(&u.IsCompleted),
 	)
 }
 

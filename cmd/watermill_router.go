@@ -5,6 +5,7 @@ import (
 	"time"
 
 	emailpubsub "github.com/Christian-007/fit-forge/internal/app/email/delivery/pubsub"
+	pointspubsub "github.com/Christian-007/fit-forge/internal/app/points/delivery/pubsub"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/decorator"
 	"github.com/ThreeDotsLabs/watermill"
@@ -56,6 +57,7 @@ func NewWatermillRouter(amqpConfig amqp.Config, watermillLogger watermill.Logger
 	}
 
 	emailpubsub.Routes(router, subscriber, appCtx)
+	pointspubsub.Routes(router, subscriber, appCtx)
 
 	return router
 

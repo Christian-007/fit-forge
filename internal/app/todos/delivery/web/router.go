@@ -18,7 +18,8 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		TodoService: todoservices.NewTodoService(todoservices.TodoServiceOptions{
 			TodoRepository: todoRepository,
 		}),
-		Logger: appCtx.Logger,
+		Logger:    appCtx.Logger,
+		Publisher: appCtx.Publisher,
 	})
 
 	userRepositoryPg := userrepositories.NewUserRepositoryPg(appCtx.Pool)

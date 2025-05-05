@@ -28,4 +28,5 @@ type Reason string
 const (
 	UserRegistrationReason Reason = "user registration"
 	CreateTodoReason       Reason = "create todo"
+	CompleteTodoReason     Reason = "complete todo"
 )

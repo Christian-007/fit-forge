@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Christian-007/fit-forge/internal/app/points/domains"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -68,4 +69,51 @@ func (p PointsRepositoryPg) Create(tx pgx.Tx, point domains.PointModel) (domains
 	}
 
 	return insertedPoint, nil
+}
+
+func (p PointsRepositoryPg) UpdateWithTransactionHistory(ctx context.Context, userId int, addedPoint int) (domains.PointModel, error) {
+	tx, err := p.db.Begin(ctx)
+	if err != nil {
+		return domains.PointModel{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	var row pgx.Row
+
+	// Step 1: Add points by updating the existing point
+	var updatedPoint domains.PointModel
+	query := `
+		UPDATE points 
+		SET
+			total_points = total_points + $1
+		WHERE user_id = $2
+		RETURNING user_id, total_points
+	`
+
+	row = tx.QueryRow(ctx, query, addedPoint, userId)
+	err = row.Scan(&updatedPoint.UserId, &updatedPoint.TotalPoints)
+	if err != nil {
+		return domains.PointModel{}, err
+	}
+
+	// Step 2: Log to the point transaction
+	pointTransaction := domains.PointTransactionsModel{
+		ID:              uuid.New(),
+		TransactionType: domains.EarnTransactionType,
+		Points:          addedPoint,
+		Reason:          domains.CompleteTodoReason,
+		UserID:          userId,
+	}
+	query = "INSERT INTO point_transactions(id, transaction_type, points, reason, user_id) VALUES ($1, $2, $3, $4, $5)"
+	_, err = tx.Exec(ctx, query, pointTransaction.ID, pointTransaction.TransactionType, pointTransaction.Points, pointTransaction.Reason, pointTransaction.UserID)
+	if err != nil {
+		return domains.PointModel{}, err
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return domains.PointModel{}, err
+	}
+
+	return updatedPoint, nil
 }
