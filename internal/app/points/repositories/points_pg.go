@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Christian-007/fit-forge/internal/app/points/domains"
+	"github.com/Christian-007/fit-forge/internal/pkg/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -117,3 +118,49 @@ func (p PointsRepositoryPg) UpdateWithTransactionHistory(ctx context.Context, us
 
 	return updatedPoint, nil
 }
+
+func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Context) (domains.UsersDueForSubscription, error) {
+	query := `
+	SELECT
+		u.id,
+		u.email,
+		p.total_points
+	FROM
+		users u
+		INNER JOIN points p ON u.id = p.user_id
+	WHERE
+		COALESCE(
+			(
+				SELECT
+					MAX(pt.created_at)
+				FROM
+					point_transactions pt
+				WHERE
+					pt.transaction_type = 'SUBSCRIPTION_DEDUCTION'
+			),
+			u.created_at::date
+		) + INTERVAL '1 month' = '2025-05-29';
+	`
+
+	usersDueForSubscription := domains.UsersDueForSubscription{}
+	deductionAmount := 100
+
+	rows, _ := p.db.Query(ctx, query)
+	users, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.UserWithPoints])
+	if err != nil {
+		return usersDueForSubscription, err
+	}
+
+	defer rows.Close()
+
+	for _, user := range users {
+		if user.Point.TotalPoints >= deductionAmount {
+			usersDueForSubscription.EligibleForDeduction = append(usersDueForSubscription.EligibleForDeduction, user)
+		} else {
+			usersDueForSubscription.InsufficientPoints = append(usersDueForSubscription.InsufficientPoints, user)
+		}
+	}
+
+	return usersDueForSubscription, nil
+}
+
