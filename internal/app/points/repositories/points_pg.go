@@ -143,7 +143,6 @@ func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Contex
 	`
 
 	usersDueForSubscription := domains.UsersDueForSubscription{}
-	deductionAmount := 100
 
 	rows, _ := p.db.Query(ctx, query)
 	users, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.UserWithPoints])
@@ -154,7 +153,7 @@ func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Contex
 	defer rows.Close()
 
 	for _, user := range users {
-		if user.Point.TotalPoints >= deductionAmount {
+		if user.Point.TotalPoints >= domains.SubscriptionDeductionAmount {
 			usersDueForSubscription.EligibleForDeduction = append(usersDueForSubscription.EligibleForDeduction, user)
 		} else {
 			usersDueForSubscription.InsufficientPoints = append(usersDueForSubscription.InsufficientPoints, user)
@@ -163,4 +162,3 @@ func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Contex
 
 	return usersDueForSubscription, nil
 }
-

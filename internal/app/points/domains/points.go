@@ -20,5 +20,9 @@ type PointChange struct {
 
 type UsersDueForSubscription struct {
 	EligibleForDeduction []sharedmodel.UserWithPoints
-	InsufficientPoints []sharedmodel.UserWithPoints
+	InsufficientPoints   []sharedmodel.UserWithPoints
 }
+
+const (
+	SubscriptionDeductionAmount int = 100
+)
