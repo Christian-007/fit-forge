@@ -1,9 +1,9 @@
-version: "3.9"
-
 services:
   postgresql:
     image: postgres:12-alpine
     container_name: postgres12
+    volumes:
+      - ./docker/init:/docker-entrypoint-initdb.d
     env_file:
       - ./.env
     ports:
