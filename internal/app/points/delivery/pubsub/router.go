@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"strconv"
 
+	"github.com/Christian-007/fit-forge/internal/app/points/domains"
 	"github.com/Christian-007/fit-forge/internal/app/points/repositories"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/topics"
@@ -37,7 +38,15 @@ func Routes(router *message.Router, subscriber *amqp.Subscriber, appCtx appconte
 			)
 
 			addedPoint := 5
-			pointModel, err := pointsRepository.UpdateWithTransactionHistory(msg.Context(), userId, addedPoint)
+			pointModel, err := pointsRepository.UpdateWithTransactionHistory(
+				msg.Context(),
+				userId,
+				domains.PointTransactionsModel{
+					TransactionType: domains.EarnTransactionType,
+					Reason:          domains.CompleteTodoReason,
+					Points:          addedPoint,
+				},
+			)
 			if err != nil {
 				appCtx.Logger.Info("[update_points_and_transactions Handler] Error updating point with transaction history",
 					slog.String("UUID", msg.UUID),

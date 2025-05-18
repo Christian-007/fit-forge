@@ -18,15 +18,17 @@ type PointTransactionsModel struct {
 type TransactionType string
 
 const (
-	EarnTransactionType   TransactionType = "earn"
-	SpendTransactionType  TransactionType = "spend"
-	ExpireTransactionType TransactionType = "expire"
+	EarnTransactionType                  TransactionType = "earn"
+	SpendTransactionType                 TransactionType = "spend"
+	ExpireTransactionType                TransactionType = "expire"
+	SubscriptionDeductionTransactionType TransactionType = "subscription_deduction"
 )
 
 type Reason string
 
 const (
-	UserRegistrationReason Reason = "user registration"
-	CreateTodoReason       Reason = "create todo"
-	CompleteTodoReason     Reason = "complete todo"
+	UserRegistrationReason      Reason = "user registration"
+	CreateTodoReason            Reason = "create todo"
+	CompleteTodoReason          Reason = "complete todo"
+	SubscriptionDeductionReason Reason = "subscription deduction"
 )

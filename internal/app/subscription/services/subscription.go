@@ -29,7 +29,11 @@ func (s SubscriptionService) ProcessDueSubscriptions(ctx context.Context, dueDat
 	}
 
 	for _, user := range usersDueForSubscription.EligibleForDeduction {
-		_, err := s.PointsRepository.UpdateWithTransactionHistory(ctx, user.Id, domains.SubscriptionDeductionAmount)
+		_, err := s.PointsRepository.UpdateWithTransactionHistory(ctx, user.Id, domains.PointTransactionsModel{
+			Points:          domains.SubscriptionDeductionAmount,
+			TransactionType: domains.SubscriptionDeductionTransactionType,
+			Reason:          domains.SubscriptionDeductionReason,
+		})
 		if err != nil {
 			s.Logger.Error("failed to deduct points", slog.Any("user", user), slog.String("error", err.Error()))
 		}
