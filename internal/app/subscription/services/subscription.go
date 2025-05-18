@@ -22,8 +22,8 @@ func NewSubscriptionService(options SubscriptionServiceOptions) SubscriptionServ
 	return SubscriptionService{options}
 }
 
-func (s SubscriptionService) ProcessDueSubscriptions(ctx context.Context) error {
-	usersDueForSubscription, err := s.PointsRepository.FindUsersForSubscriptionDeduction(ctx)
+func (s SubscriptionService) ProcessDueSubscriptions(ctx context.Context, dueDate string) error {
+	usersDueForSubscription, err := s.PointsRepository.FindUsersForSubscriptionDeduction(ctx, dueDate)
 	if err != nil {
 		return err
 	}

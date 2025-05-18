@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Christian-007/fit-forge/internal/app/points/domains"
 	"github.com/Christian-007/fit-forge/internal/pkg/model"
@@ -119,7 +120,8 @@ func (p PointsRepositoryPg) UpdateWithTransactionHistory(ctx context.Context, us
 	return updatedPoint, nil
 }
 
-func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Context) (domains.UsersDueForSubscription, error) {
+func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Context, dueDate string) (domains.UsersDueForSubscription, error) {
+	dueDateQuery := fmt.Sprintf("'%s'", dueDate)
 	query := `
 	SELECT
 		u.id,
@@ -139,21 +141,29 @@ func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Contex
 					pt.transaction_type = 'SUBSCRIPTION_DEDUCTION'
 			),
 			u.created_at::date
-		) + INTERVAL '1 month' = '2025-05-29';
-	`
+		) + INTERVAL '1 month' = ` + dueDateQuery + ";"
 
 	usersDueForSubscription := domains.UsersDueForSubscription{}
 
-	rows, _ := p.db.Query(ctx, query)
-	users, err := pgx.CollectRows(rows, pgx.RowToStructByName[model.UserWithPoints])
+	rows, err := p.db.Query(ctx, query)
 	if err != nil {
 		return usersDueForSubscription, err
 	}
 
 	defer rows.Close()
 
+	users := []model.UserWithPoints{}
+	for rows.Next() {
+		user := model.UserWithPoints{}
+		err := rows.Scan(&user.Id, &user.Email, &user.TotalPoints)
+		if err != nil {
+			return usersDueForSubscription, fmt.Errorf("unable to scan row: %w", err)
+		}
+		users = append(users, user)
+	}
+
 	for _, user := range users {
-		if user.Point.TotalPoints >= domains.SubscriptionDeductionAmount {
+		if user.TotalPoints >= domains.SubscriptionDeductionAmount {
 			usersDueForSubscription.EligibleForDeduction = append(usersDueForSubscription.EligibleForDeduction, user)
 		} else {
 			usersDueForSubscription.InsufficientPoints = append(usersDueForSubscription.InsufficientPoints, user)
