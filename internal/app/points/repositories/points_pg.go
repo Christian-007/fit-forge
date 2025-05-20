@@ -133,13 +133,12 @@ func (p PointsRepositoryPg) FindUsersForSubscriptionDeduction(ctx context.Contex
 				FROM
 					point_transactions pt
 				WHERE
-					pt.transaction_type = 'SUBSCRIPTION_DEDUCTION'
+					pt.transaction_type = 'subscription_deduction'
 			),
 			u.created_at::date
-		) + INTERVAL '1 month' = ` + dueDateQuery + ";"
+		) + INTERVAL '1 day' <= ` + dueDateQuery + ";"
 
 	usersDueForSubscription := domains.UsersDueForSubscription{}
-
 	rows, err := p.db.Query(ctx, query)
 	if err != nil {
 		return usersDueForSubscription, err

@@ -38,7 +38,7 @@ var _ = Describe("PointsRepository", func() {
 				userWithPoints, err := usersRepo.CreateWithInitialPoints(ctx, domains.UserModel{Name: "John Test", Email: "johntest@gmail.com", Password: []byte("test")})
 				Expect(err).NotTo(HaveOccurred())
 
-				users, err := pointsRepo.FindUsersForSubscriptionDeduction(ctx, userWithPoints.CreatedAt.AddDate(0, 1, 0).Format("2006-01-02"))
+				users, err := pointsRepo.FindUsersForSubscriptionDeduction(ctx, userWithPoints.CreatedAt.AddDate(0, 0, 1).Format("2006-01-02"))
 				Expect(err).ToNot(HaveOccurred())
 
 				mockEligibleUsersResponse := []sharedmodel.UserWithPoints{
