@@ -210,9 +210,10 @@ func (u UserRepositoryPg) UpdateOneByEmail(email string, updateUser domains.User
 			email = COALESCE(@email, email),
 			password = COALESCE(@password, password),
 			role = COALESCE(@role, role),
+			subscription_status = COALESCE(@subscription_status, subscription_status),
 			email_verified_at = COALESCE(@email_verified_at, email_verified_at)
 		WHERE email = @email
-		RETURNING id, name, email, password, role, created_at, email_verified_at
+		RETURNING id, name, email, password, role, subscription_status, created_at, email_verified_at
 	`
 
 	var user domains.UserModel
@@ -222,6 +223,7 @@ func (u UserRepositoryPg) UpdateOneByEmail(email string, updateUser domains.User
 		&user.Email,
 		&user.Password,
 		&user.Role,
+		&user.SubscriptionStatus,
 		&user.CreatedAt,
 		&user.EmailVerifiedAt,
 	)
@@ -248,6 +250,9 @@ func createUpdateUserPgxArgsByEmail(email string, updateUser domains.UserModel) 
 	}
 	if updateUser.Role != 0 {
 		result["role"] = updateUser.Role
+	}
+	if updateUser.SubscriptionStatus != "" {
+		result["subscription_status"] = updateUser.SubscriptionStatus
 	}
 	if updateUser.EmailVerifiedAt != nil {
 		result["email_verified_at"] = updateUser.EmailVerifiedAt

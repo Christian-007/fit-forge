@@ -66,11 +66,12 @@ func (u UserServiceImpl) GetOneByEmail(email string) (dto.GetUserByEmailResponse
 	}
 
 	response := dto.GetUserByEmailResponse{
-		Id:       userModel.Id,
-		Name:     userModel.Name,
-		Email:    userModel.Email,
-		Role:     userModel.Role,
-		Password: userModel.Password,
+		Id:                 userModel.Id,
+		Name:               userModel.Name,
+		Email:              userModel.Email,
+		Role:               userModel.Role,
+		SubscriptionStatus: userModel.SubscriptionStatus,
+		Password:           userModel.Password,
 	}
 	return response, nil
 }
@@ -204,6 +205,10 @@ func toUserModel(updateUserRequest dto.UpdateUserRequest) (domains.UserModel, er
 		userModel.Role = *updateUserRequest.Role
 	}
 
+	if updateUserRequest.SubscriptionStatus != nil {
+		userModel.SubscriptionStatus = *updateUserRequest.SubscriptionStatus
+	}
+
 	if updateUserRequest.EmailVerifiedAt != nil {
 		userModel.EmailVerifiedAt = updateUserRequest.EmailVerifiedAt
 	}
@@ -213,21 +218,23 @@ func toUserModel(updateUserRequest dto.UpdateUserRequest) (domains.UserModel, er
 
 func toUserResponse(userModel domains.UserModel) dto.UserResponse {
 	return dto.UserResponse{
-		Id:              userModel.Id,
-		Name:            userModel.Name,
-		Email:           userModel.Email,
-		Role:            userModel.Role,
-		EmailVerifiedAt: userModel.EmailVerifiedAt,
+		Id:                 userModel.Id,
+		Name:               userModel.Name,
+		Email:              userModel.Email,
+		Role:               userModel.Role,
+		SubscriptionStatus: userModel.SubscriptionStatus,
+		EmailVerifiedAt:    userModel.EmailVerifiedAt,
 	}
 }
 
 func toUserWithPointsResponse(userWithPointsModel domains.UserWithPoints) dto.UserWithPointsResponse {
 	return dto.UserWithPointsResponse{
-		Id:              userWithPointsModel.Id,
-		Name:            userWithPointsModel.Name,
-		Email:           userWithPointsModel.Email,
-		Role:            userWithPointsModel.Role,
-		EmailVerifiedAt: userWithPointsModel.EmailVerifiedAt,
-		Point:           userWithPointsModel.Point,
+		Id:                 userWithPointsModel.Id,
+		Name:               userWithPointsModel.Name,
+		Email:              userWithPointsModel.Email,
+		Role:               userWithPointsModel.Role,
+		SubscriptionStatus: userWithPointsModel.SubscriptionStatus,
+		EmailVerifiedAt:    userWithPointsModel.EmailVerifiedAt,
+		Point:              userWithPointsModel.Point,
 	}
 }

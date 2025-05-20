@@ -8,6 +8,7 @@ import (
 	authdto "github.com/Christian-007/fit-forge/internal/app/auth/dto"
 	authservices "github.com/Christian-007/fit-forge/internal/app/auth/services"
 	emailservices "github.com/Christian-007/fit-forge/internal/app/email/services"
+	usersdomain "github.com/Christian-007/fit-forge/internal/app/users/domains"
 	userdto "github.com/Christian-007/fit-forge/internal/app/users/dto"
 	userservices "github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
@@ -120,8 +121,10 @@ func (a AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	currentTime := time.Now()
+	subscriptionStatus := usersdomain.ActiveSubscriptionStatus
 	updateUserRequest := userdto.UpdateUserRequest{
-		EmailVerifiedAt: &currentTime,
+		EmailVerifiedAt:    &currentTime,
+		SubscriptionStatus: &subscriptionStatus,
 	}
 
 	userResponse, err := a.UserService.UpdateOneByEmail(email, updateUserRequest)

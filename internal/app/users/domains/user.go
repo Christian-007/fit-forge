@@ -7,22 +7,31 @@ import (
 )
 
 type UserModel struct {
-	Id              int        `json:"id"`
-	Name            string     `json:"name"`
-	Email           string     `json:"email"`
-	Password        []byte     `json:"password"`
-	Role            int        `json:"role"` // 1 is admin and, 2 is user
-	CreatedAt       time.Time  `json:"createdAt"`
-	EmailVerifiedAt *time.Time `json:"emailVerifiedAt"`
+	Id                 int                `json:"id"`
+	Name               string             `json:"name"`
+	Email              string             `json:"email"`
+	Password           []byte             `json:"password"`
+	Role               int                `json:"role"` // 1 is admin and, 2 is user
+	SubscriptionStatus SubscriptionStatus `json:"subscriptionStatus"`
+	CreatedAt          time.Time          `json:"createdAt"`
+	EmailVerifiedAt    *time.Time         `json:"emailVerifiedAt"`
 }
 
 type UserWithPoints struct {
-	Id              int                `json:"id"`
-	Name            string             `json:"name"`
-	Email           string             `json:"email"`
-	Password        []byte             `json:"password"`
-	Role            int                `json:"role"` // 1 is admin and, 2 is user
-	CreatedAt       time.Time          `json:"createdAt"`
-	EmailVerifiedAt *time.Time         `json:"emailVerifiedAt"`
-	Point           domains.PointModel `json:"point"`
+	Id                 int                `json:"id"`
+	Name               string             `json:"name"`
+	Email              string             `json:"email"`
+	Password           []byte             `json:"password"`
+	Role               int                `json:"role"` // 1 is admin and, 2 is user
+	SubscriptionStatus SubscriptionStatus `json:"subscriptionStatus"`
+	CreatedAt          time.Time          `json:"createdAt"`
+	EmailVerifiedAt    *time.Time         `json:"emailVerifiedAt"`
+	Point              domains.PointModel `json:"point"`
 }
+
+type SubscriptionStatus string
+
+const (
+	InactiveSubscriptionStatus SubscriptionStatus = "INACTIVE"
+	ActiveSubscriptionStatus   SubscriptionStatus = "ACTIVE"
+)
