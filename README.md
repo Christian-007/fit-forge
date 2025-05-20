@@ -24,11 +24,13 @@ To start this repo on your machine, do the following:
 Setup the following environment variables in `./.env` file:
 
 ```
+ROOT_DIR="/Users/folder/to/project"
 DB_USER="dbUser"
 POSTGRES_USER=someusername
 POSTGRES_PASSWORD="somepassword"
-POSTGRES_DB=fit_forge
+POSTGRES_MULTIPLE_DATABASES=main_dv,main_db_test
 POSTGRES_URL="postgresql://someusername:somepassword@localhost:5433/fit_forge?sslmode=disable"
+POSTGRES_TEST_DB_URL="postgresql://root:password@localhost:5433/fit_forge_test?sslmode=disable"
 AUTH_SECRET_KEY="sup3rs3cr3t"
 REDIS_DSN="localhost:6379"
 REDIS_PASSWORD="secret"
@@ -37,4 +39,5 @@ RABBITMQ_DEFAULT_PASS="password"
 RABBITMQ_URL="amqp://username:password@localhost:5672/"
 EMAIL_HOST="https://sandbox.api.mailtrap.io"
 MAILTRAP_API_KEY="API_KEY"
+SUBSCRIPTION_INTERVAL_MINUTES=1
 ```
