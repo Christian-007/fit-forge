@@ -24,5 +24,5 @@ type UsersDueForSubscription struct {
 }
 
 const (
-	SubscriptionDeductionAmount int = 100
+	SubscriptionDeductionAmount int = 25
 )
