@@ -7,6 +7,7 @@ import (
 
 	"github.com/Christian-007/fit-forge/internal/app/auth/domains"
 	authdto "github.com/Christian-007/fit-forge/internal/app/auth/dto"
+	usersdomain "github.com/Christian-007/fit-forge/internal/app/users/domains"
 	userdto "github.com/Christian-007/fit-forge/internal/app/users/dto"
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
@@ -45,10 +46,11 @@ func (a AuthServiceImpl) Authenticate(loginRequest authdto.LoginRequest) (userdt
 	}
 
 	response := userdto.UserResponse{
-		Id:    user.Id,
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  user.Role,
+		Id:                 user.Id,
+		Name:               user.Name,
+		Email:              user.Email,
+		Role:               user.Role,
+		SubscriptionStatus: user.SubscriptionStatus,
 	}
 	return response, nil
 }
@@ -119,7 +121,7 @@ func (a AuthServiceImpl) SaveToken(userResponse userdto.UserResponse, authToken 
 	err := a.Cache.SetHash(authToken.AccessTokenUuid,
 		"userId", userResponse.Id,
 		"role", userResponse.Role,
-		"subscriptionStatus", userResponse.SubscriptionStatus,
+		"subscriptionStatus", string(userResponse.SubscriptionStatus),
 	)
 	if err != nil {
 		return err
@@ -153,9 +155,12 @@ func (a AuthServiceImpl) GetHashAuthDataFromCache(accessTokenUuid string) (domai
 		return domains.AuthData{}, err
 	}
 
+	subscriptionStatus := usersdomain.SubscriptionStatus(result["subscriptionStatus"])
+
 	return domains.AuthData{
-		UserId: userIdInt,
-		Role:   roleInt,
+		UserId:             userIdInt,
+		Role:               roleInt,
+		SubscriptionStatus: subscriptionStatus,
 	}, nil
 }
 

@@ -57,6 +57,7 @@ func StrictSession(authService services.AuthService) func(http.Handler) http.Han
 
 			ctx := requestctx.WithUserId(r.Context(), authData.UserId)
 			ctx = requestctx.WithRole(ctx, authData.Role)
+			ctx = requestctx.WithSubscriptionStatus(ctx, authData.SubscriptionStatus)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

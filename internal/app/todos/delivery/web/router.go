@@ -33,12 +33,16 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	})
 
 	strictSessionMiddleware := middlewares.StrictSession(authService)
+	subscriptionStatusMiddleware := middlewares.SubscriptionStatus()
 
 	// All routes require auth session check
 	r.Use(strictSessionMiddleware)
 
 	// Routes that can be accessed by all roles
 	r.Group(func(r chi.Router) {
+		// Check if the user's subscription status is 'ACTIVE'
+		r.Use(subscriptionStatusMiddleware)
+
 		r.Get("/", todoHandler.GetAllByUserId)
 		r.Get("/{id}", todoHandler.GetOne)
 		r.Post("/", todoHandler.Create)
