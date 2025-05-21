@@ -1,6 +1,9 @@
 package domains
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	usersdomain "github.com/Christian-007/fit-forge/internal/app/users/domains"
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type Claims struct {
 	UserID int `json:"userId"`
@@ -15,6 +18,7 @@ type AuthToken struct {
 }
 
 type AuthData struct {
-	UserId int `json:"userId"`
-	Role   int `json:"role"`
+	UserId             int                            `json:"userId"`
+	Role               int                            `json:"role"`
+	SubscriptionStatus usersdomain.SubscriptionStatus `json:"subscriptionStatus"`
 }

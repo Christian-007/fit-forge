@@ -116,7 +116,11 @@ func (a AuthServiceImpl) InvalidateToken(accessTokenUuid string) error {
 
 func (a AuthServiceImpl) SaveToken(userResponse userdto.UserResponse, authToken domains.AuthToken) error {
 	accessTokenExpiration := time.Until(authToken.AccessTokenExpiresAt.Time)
-	err := a.Cache.SetHash(authToken.AccessTokenUuid, "userId", userResponse.Id, "role", userResponse.Role)
+	err := a.Cache.SetHash(authToken.AccessTokenUuid,
+		"userId", userResponse.Id,
+		"role", userResponse.Role,
+		"subscriptionStatus", userResponse.SubscriptionStatus,
+	)
 	if err != nil {
 		return err
 	}
