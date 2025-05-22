@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package subscription;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "subscription/gen";
+
+message DueSubscriptionRequest {
+    string dueDate = 1;
+}
+
+service SubscriptionService {
+    rpc ProcessDueSubscriptions(DueSubscriptionRequest) returns (google.protobuf.Empty);
+}
