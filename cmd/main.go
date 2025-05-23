@@ -131,6 +131,21 @@ func main() {
 		return nil
 	})
 
+	// Start gRPC Server
+	errgrp.Go(func() error {
+		addr := ":50051"
+		logger.Info("starting gRPC server", "addr", addr)
+
+		grpcServicesFn := InitGrpcServices(appCtx)
+		err = StartGrpcServer(addr, grpcServicesFn)
+		if err != nil {
+			logger.Error(err.Error())
+			return err
+		}
+
+		return nil
+	})
+
 	errgrp.Go(func() error {
 		<-ctx.Done()
 		return server.Shutdown(ctx)
