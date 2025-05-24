@@ -7,7 +7,7 @@ CREATE TABLE "points" (
 
 CREATE TABLE "point_transactions" (
   "id" uuid PRIMARY KEY,
-  "transaction_type" varchar(20) CHECK (transaction_type IN ('earn', 'spend', 'expire')),
+  "transaction_type" varchar(50) CHECK (transaction_type IN ('earn', 'spend', 'expire', 'subscription_deduction')),
   "points" integer NOT NULL,
   "reason" text,
   "user_id" integer REFERENCES "users" ("id") ON DELETE CASCADE,
