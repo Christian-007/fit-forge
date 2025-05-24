@@ -85,8 +85,7 @@ func main() {
 		Publisher:          publisher,
 	})
 
-	ctx := context.Background()
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
 	errgrp, ctx := errgroup.WithContext(ctx)
@@ -137,7 +136,7 @@ func main() {
 		logger.Info("starting gRPC server", "addr", addr)
 
 		grpcServicesFn := InitGrpcServices(appCtx)
-		err = StartGrpcServer(addr, grpcServicesFn)
+		err = StartGrpcServer(ctx, addr, grpcServicesFn)
 		if err != nil {
 			logger.Error(err.Error())
 			return err

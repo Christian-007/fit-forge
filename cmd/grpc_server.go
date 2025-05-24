@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net"
 
 	pointrepositories "github.com/Christian-007/fit-forge/internal/app/points/repositories"
@@ -20,8 +21,8 @@ func InitGrpcServices(appCtx appcontext.AppContext) func(*grpc.Server) {
 	})
 	subscriptionService := subscriptionservices.NewSubscriptionService(subscriptionservices.SubscriptionServiceOptions{
 		PointsRepository: pointRepository,
-		UsersService: userService,
-		Logger: appCtx.Logger,
+		UsersService:     userService,
+		Logger:           appCtx.Logger,
 	})
 
 	return func(s *grpc.Server) {
@@ -29,7 +30,7 @@ func InitGrpcServices(appCtx appcontext.AppContext) func(*grpc.Server) {
 	}
 }
 
-func StartGrpcServer(addr string, registerFn func(*grpc.Server)) error {
+func StartGrpcServer(ctx context.Context, addr string, registerFn func(*grpc.Server)) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
@@ -37,6 +38,11 @@ func StartGrpcServer(addr string, registerFn func(*grpc.Server)) error {
 
 	grpcServer := grpc.NewServer()
 	registerFn(grpcServer)
+
+	go func() {
+		<-ctx.Done()
+		grpcServer.GracefulStop()
+	}()
 
 	return grpcServer.Serve(listener)
 }
