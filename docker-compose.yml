@@ -16,6 +16,14 @@ services:
     ports:
       - "5672:5672" # AMQP messaging port
       - "15672:15672" # Management UI port
+  gcloudpubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    container_name: gcloudpubsub-emulator
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"
+    env_file:
+      - ./.env
   redis:
     image: redis:7.4-alpine
     container_name: redis7
