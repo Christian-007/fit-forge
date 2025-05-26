@@ -8,11 +8,11 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/points/repositories"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/topics"
-	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
 	"github.com/ThreeDotsLabs/watermill/message"
 )
 
-func Routes(router *message.Router, subscriber *amqp.Subscriber, appCtx appcontext.AppContext) {
+func Routes(router *message.Router, subscriber *googlecloud.Subscriber, appCtx appcontext.AppContext) {
 	// Instantiate dependencies
 	pointsRepository := repositories.NewPointsRepositoryPg(appCtx.Pool)
 

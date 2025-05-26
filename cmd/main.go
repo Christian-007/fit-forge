@@ -17,7 +17,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 
 	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
 
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/errgroup"
@@ -64,16 +64,19 @@ func main() {
 
 	// Create a connection to a Message Broker
 	watermillLogger := watermill.NewStdLogger(false, false)
-	amqpConfig := amqp.NewDurableQueueConfig(envVariableService.Get("RABBITMQ_URL"))
-	amqpPublisher, err := amqp.NewPublisher(amqpConfig, watermillLogger)
-	publisher := decorator.PublishWithCorrelationId{Publisher: amqpPublisher}
-
+	gcloudPublisher, err := googlecloud.NewPublisher(
+		googlecloud.PublisherConfig{
+			ProjectID: envVariableService.Get("PUBSUB_PROJECT_ID"),
+		},
+		watermillLogger,
+	)
 	if err != nil {
-		logger.Error("Failed to create a publisher in RabbitMQ",
+		logger.Error("Failed to create a publisher in Google Pub/Sub",
 			slog.String("error", err.Error()),
 		)
 		panic(err)
 	}
+	publisher := decorator.PublishWithCorrelationId{Publisher: gcloudPublisher}
 	defer publisher.Close()
 
 	// Instantiate the all application dependencies
@@ -91,7 +94,7 @@ func main() {
 	errgrp, ctx := errgroup.WithContext(ctx)
 
 	// Instantiate the PubSub router
-	watermillRouter := NewWatermillRouter(amqpConfig, watermillLogger, appCtx)
+	watermillRouter := NewWatermillRouter(watermillLogger, appCtx)
 	errgrp.Go(func() error {
 		logger.Info("starting PubSub router...")
 		err = watermillRouter.Run(ctx) // Starting the PubSub router in a Goroutine

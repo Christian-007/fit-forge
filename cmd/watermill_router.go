@@ -9,12 +9,12 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/decorator"
 	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill-amqp/v3/pkg/amqp"
+	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
 )
 
-func NewWatermillRouter(amqpConfig amqp.Config, watermillLogger watermill.LoggerAdapter, appCtx appcontext.AppContext) *message.Router {
+func NewWatermillRouter(watermillLogger watermill.LoggerAdapter, appCtx appcontext.AppContext) *message.Router {
 	router, err := message.NewRouter(message.RouterConfig{}, watermillLogger)
 	if err != nil {
 		appCtx.Logger.Error("Failed to create Watermill Router",
@@ -45,12 +45,14 @@ func NewWatermillRouter(amqpConfig amqp.Config, watermillLogger watermill.Logger
 		}
 	})
 
-	subscriber, err := amqp.NewSubscriber(
-		amqpConfig,
+	subscriber, err := googlecloud.NewSubscriber(
+		googlecloud.SubscriberConfig{
+			ProjectID: appCtx.EnvVariableService.Get("PUBSUB_PROJECT_ID"),
+		},
 		watermillLogger,
 	)
 	if err != nil {
-		appCtx.Logger.Error("Failed to connect to RabbitMQ",
+		appCtx.Logger.Error("Failed to connect to Google Pub/Sub subscriber",
 			slog.String("error", err.Error()),
 		)
 		panic(err)
