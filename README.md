@@ -40,4 +40,6 @@ RABBITMQ_URL="amqp://username:password@localhost:5672/"
 EMAIL_HOST="https://sandbox.api.mailtrap.io"
 MAILTRAP_API_KEY="API_KEY"
 SUBSCRIPTION_INTERVAL_MINUTES=1
+PUBSUB_PROJECT_ID=local-project
+PUBSUB_EMULATOR_HOST=localhost:8085
 ```
