@@ -16,5 +16,6 @@
 # Dependency directories (remove the comment below to include it)
 vendor/
 
-# Environment file
+# Environment files
 .env
+.env.prod
