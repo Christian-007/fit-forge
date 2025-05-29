@@ -3,6 +3,7 @@ package pubsub
 import (
 	"encoding/json"
 	"log/slog"
+	"os"
 
 	emailservices "github.com/Christian-007/fit-forge/internal/app/email/services"
 	"github.com/Christian-007/fit-forge/internal/app/users/dto"
@@ -16,7 +17,7 @@ import (
 func Routes(router *message.Router, subscriber *googlecloud.Subscriber, appCtx appcontext.AppContext) {
 	// Instantiate dependencies
 	tokenService := security.NewTokenService(security.TokenServiceOptions{
-		SecretKey: appCtx.EnvVariableService.Get("AUTH_SECRET_KEY"),
+		SecretKey: os.Getenv("AUTH_SECRET_KEY"),
 	})
 	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
 		Host:         "http://localhost:4000",
@@ -24,8 +25,8 @@ func Routes(router *message.Router, subscriber *googlecloud.Subscriber, appCtx a
 		TokenService: tokenService,
 	})
 	mailtrapSender := emailservices.NewMailtrapEmailService(emailservices.MailtrapSenderOptions{
-		Host:   appCtx.EnvVariableService.Get("EMAIL_HOST"),
-		ApiKey: appCtx.EnvVariableService.Get("MAILTRAP_API_KEY"),
+		Host:   os.Getenv("EMAIL_HOST"),
+		ApiKey: os.Getenv("MAILTRAP_API_KEY"),
 	})
 
 	// Instantiate handler

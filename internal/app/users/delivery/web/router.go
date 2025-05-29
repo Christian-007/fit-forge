@@ -1,6 +1,8 @@
 package web
 
 import (
+	"os"
+
 	authservices "github.com/Christian-007/fit-forge/internal/app/auth/services"
 	emailservices "github.com/Christian-007/fit-forge/internal/app/email/services"
 	"github.com/Christian-007/fit-forge/internal/app/users/repositories"
@@ -18,7 +20,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		UserRepository: userRepositoryPg,
 	})
 	tokenService := security.NewTokenService(security.TokenServiceOptions{
-		SecretKey: appCtx.EnvVariableService.Get("AUTH_SECRET_KEY"),
+		SecretKey: os.Getenv("AUTH_SECRET_KEY"),
 	})
 	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
 		Host:         "http://localhost:4000",
@@ -26,8 +28,8 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		TokenService: tokenService,
 	})
 	mailtrapSender := emailservices.NewMailtrapEmailService(emailservices.MailtrapSenderOptions{
-		Host:   appCtx.EnvVariableService.Get("EMAIL_HOST"),
-		ApiKey: appCtx.EnvVariableService.Get("MAILTRAP_API_KEY"),
+		Host:   os.Getenv("EMAIL_HOST"),
+		ApiKey: os.Getenv("MAILTRAP_API_KEY"),
 	})
 	userHandler := NewUserHandler(UserHandlerOptions{
 		UserService:    userService,
@@ -37,9 +39,8 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Publisher:      appCtx.Publisher,
 	})
 	authService := authservices.NewAuthServiceImpl(authservices.AuthServiceOptions{
-		UserService:        userService,
-		Cache:              appCtx.RedisClient,
-		EnvVariableService: appCtx.EnvVariableService,
+		UserService: userService,
+		Cache:       appCtx.RedisClient,
 	})
 
 	strictSessionMiddleware := middlewares.StrictSession(authService)

@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"os"
 	"strconv"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
-	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -23,9 +23,8 @@ type AuthServiceImpl struct {
 }
 
 type AuthServiceOptions struct {
-	UserService        services.UserService
-	Cache              cache.Cache
-	EnvVariableService envvariable.EnvVariableService
+	UserService services.UserService
+	Cache       cache.Cache
 }
 
 func NewAuthServiceImpl(options AuthServiceOptions) AuthServiceImpl {
@@ -58,7 +57,7 @@ func (a AuthServiceImpl) Authenticate(loginRequest authdto.LoginRequest) (userdt
 func (a AuthServiceImpl) CreateToken(userId int) (domains.AuthToken, error) {
 	authToken := domains.AuthToken{}
 	uuid := uuid.NewString()
-	secretKey := []byte(a.EnvVariableService.Get("AUTH_SECRET_KEY"))
+	secretKey := []byte(os.Getenv("AUTH_SECRET_KEY"))
 	expiresAt := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 	claims := domains.Claims{
 		UserID: userId,
@@ -83,7 +82,7 @@ func (a AuthServiceImpl) CreateToken(userId int) (domains.AuthToken, error) {
 }
 
 func (a AuthServiceImpl) ValidateToken(tokenString string) (*domains.Claims, error) {
-	secretKey := []byte(a.EnvVariableService.Get("AUTH_SECRET_KEY"))
+	secretKey := []byte(os.Getenv("AUTH_SECRET_KEY"))
 	claims := &domains.Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		return secretKey, nil

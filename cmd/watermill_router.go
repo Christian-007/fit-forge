@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"os"
 	"time"
 
 	emailpubsub "github.com/Christian-007/fit-forge/internal/app/email/delivery/pubsub"
@@ -47,7 +48,7 @@ func NewWatermillRouter(watermillLogger watermill.LoggerAdapter, appCtx appconte
 
 	subscriber, err := googlecloud.NewSubscriber(
 		googlecloud.SubscriberConfig{
-			ProjectID: appCtx.EnvVariableService.Get("PUBSUB_PROJECT_ID"),
+			ProjectID: os.Getenv("PUBSUB_PROJECT_ID"),
 		},
 		watermillLogger,
 	)

@@ -34,6 +34,9 @@ migrate_down_1: validate_env
 test:
 	sh -c 'env $$(cat .env | xargs) go test ./...'
 
+run:
+	sh -c 'env $$(cat .env | xargs) go run ./cmd'
+
 unit_test_coverage:
 	@go test -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out

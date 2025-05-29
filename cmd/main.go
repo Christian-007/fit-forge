@@ -14,7 +14,6 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/Christian-007/fit-forge/internal/pkg/decorator"
-	"github.com/Christian-007/fit-forge/internal/pkg/envvariable"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
@@ -31,16 +30,8 @@ func main() {
 	slogLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	logger := applog.NewSlogLogger(slogLogger)
 
-	// Load `.env` file
-	envVariableService := envvariable.GodotEnvVariableService{}
-	err := envVariableService.Load()
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
-
 	// Open DB connection
-	pool, err := db.OpenPostgresDbPool(envVariableService.Get("POSTGRES_URL"))
+	pool, err := db.OpenPostgresDbPool(os.Getenv("POSTGRES_URL"))
 	if err != nil {
 		logger.Error("Failed to connect to Postgresql",
 			slog.String("error", err.Error()),
@@ -51,8 +42,8 @@ func main() {
 
 	// Open Redis Connection
 	client, err := cache.NewRedisCache(&redis.Options{
-		Addr:     envVariableService.Get("REDIS_DSN"),
-		Password: envVariableService.Get("REDIS_PASSWORD"),
+		Addr:     os.Getenv("REDIS_DSN"),
+		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 	})
 	if err != nil {
@@ -66,7 +57,7 @@ func main() {
 	watermillLogger := watermill.NewStdLogger(false, false)
 	gcloudPublisher, err := googlecloud.NewPublisher(
 		googlecloud.PublisherConfig{
-			ProjectID: envVariableService.Get("PUBSUB_PROJECT_ID"),
+			ProjectID: os.Getenv("PUBSUB_PROJECT_ID"),
 		},
 		watermillLogger,
 	)
@@ -81,11 +72,10 @@ func main() {
 
 	// Instantiate the all application dependencies
 	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
-		Logger:             logger,
-		Pool:               pool,
-		RedisClient:        client,
-		EnvVariableService: envVariableService,
-		Publisher:          publisher,
+		Logger:      logger,
+		Pool:        pool,
+		RedisClient: client,
+		Publisher:   publisher,
 	})
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)

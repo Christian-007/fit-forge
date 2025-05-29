@@ -1,6 +1,8 @@
 package web
 
 import (
+	"os"
+
 	authservices "github.com/Christian-007/fit-forge/internal/app/auth/services"
 	emailservices "github.com/Christian-007/fit-forge/internal/app/email/services"
 	userrepositories "github.com/Christian-007/fit-forge/internal/app/users/repositories"
@@ -19,14 +21,13 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	})
 
 	authService := authservices.NewAuthServiceImpl(authservices.AuthServiceOptions{
-		UserService:        userService,
-		Cache:              appCtx.RedisClient,
-		EnvVariableService: appCtx.EnvVariableService,
+		UserService: userService,
+		Cache:       appCtx.RedisClient,
 	})
 	logoutSessionMiddleware := middlewares.LogoutSession(authService)
 
 	tokenService := security.NewTokenService(security.TokenServiceOptions{
-		SecretKey: appCtx.EnvVariableService.Get("AUTH_SECRET_KEY"),
+		SecretKey: os.Getenv("AUTH_SECRET_KEY"),
 	})
 	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
 		Host:         "http://localhost:4000",
