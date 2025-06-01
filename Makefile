@@ -34,10 +34,13 @@ test:
 	sh -c 'env $$(cat .env | xargs) go test ./...'
 
 run:
+	sh -c 'env $$(cat .env | xargs) go run ./cmd'
+
+run_prod:
 	sh -c 'env $$(cat .env.prod | xargs) go run ./cmd'
 
 unit_test_coverage:
 	@go test -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out
 
-.PHONY: run_db_container start_db stop_db create_db drop_db migrate_up_all migrate_down_all migrate_up_1 migrate_down_1 test unit_test_coverage
+.PHONY: run_db_container start_db stop_db create_db drop_db migrate_up_all migrate_down_all migrate_up_1 migrate_down_1 test unit_test_coverage run run_prod
