@@ -39,6 +39,9 @@ run:
 run_prod:
 	sh -c 'env $$(cat .env.prod | xargs) go run ./cmd'
 
+generate_jwks:
+	sh -c 'env $$(cat .env.prod | xargs) go run ./api-gateway/generate-private-key-jwks.go'
+
 unit_test_coverage:
 	@go test -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out

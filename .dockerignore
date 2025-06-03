@@ -31,5 +31,7 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+jwks.json
+private.pem
 LICENSE
 README.md

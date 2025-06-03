@@ -1,0 +1,394 @@
+swagger: '2.0'
+info:
+  title: Fit Forge API
+  description: API Gateway for Fit Forge's monolithic service deployed on Cloud Run
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+securityDefinitions:
+  api_key_1:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+  jwt_auth:
+    authorizationUrl: "" # Simple Bearer token flow
+    flow: "implicit" # Required for oauth2 type in Swagger 2.0
+    type: "oauth2"
+    x-google-issuer: "https://fit-forge-prod-669788535349.us-central1.run.app" 
+    x-google-jwks_uri: "https://storage.googleapis.com/fit-forge-jwks-bucket/jwks.json"
+    x-google-audiences: "fit-forge-api"
+paths:
+  # --- Health Endpoint ---
+  /health:
+    get:
+      summary: API Health endpoint
+      operationId: health
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+      responses:
+        '200':
+          description: Ok
+  # --- Auth Endpoints ---
+  /auth/login:
+    post:
+      summary: User login
+      operationId: authLogin
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+      parameters:
+        - name: payload
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/LoginPayload"
+      responses:
+        '200':
+          description: A successful response
+        '401':
+          description: Unauthorized
+  /auth/verify/{token}:
+    post:
+      summary: Verify user token
+      operationId: authVerifyToken
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+      parameters:
+        - name: token
+          in: path
+          type: string
+          required: true
+          description: Token to verify
+      responses:
+        '200':
+          description: A successful response
+        '401':
+          description: Invalid token
+  /auth/logout:
+    post:
+      summary: User logout
+      operationId: authLogout
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      responses:
+        '200':
+          description: Logout successful
+  # --- Todos Endpoints ---
+  /todos:
+    get:
+      summary: Get all todos for the authenticated user
+      operationId: getAllTodosForAuthUser
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      responses:
+        '200':
+          description: A list of todos for the authenticated user
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Todo"
+    post:
+      summary: Create a new todo
+      operationId: createTodo
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: body
+          name: payload
+          required: true
+          schema:
+            $ref: "#/definitions/NewTodo"
+      responses:
+        "201":
+          description: "Todo created"
+  /todos/all:
+    get:
+      summary: Get all todos (admin access)
+      operationId: listAllTodos
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      responses:
+        "200":
+          description: A list of all todos
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Todo"
+  /todos/{id}:
+    get:
+      summary: Get a todo by ID
+      operationId: getTodoById
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID of the todo
+      responses:
+        "200":
+          description: Todo details
+          schema:
+            $ref: "#/definitions/Todo"
+        "404":
+          description: Todo not found
+    delete:
+      summary: Delete a todo by ID
+      operationId: deleteTodoById
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID of the todo to delete
+      responses:
+        "204":
+          description: Todo deleted
+        "404":
+          description: Todo not found
+    patch:
+      summary: Update a todo by ID
+      operationId: patchTodoById
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: "ID of the todo to update"
+        - in: body
+          name: payload
+          required: true
+          schema:
+            $ref: "#/definitions/PatchTodo"
+      responses:
+        "200":
+          description: Todo updated
+        "404":
+          description: Todo not found
+  # --- Users Endpoints ---
+  /users:
+    get:
+      summary: Get all users
+      operationId: listUsers
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      responses:
+        "200":
+          description: A list of users
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/User"
+    post:
+      summary: Create a new user
+      operationId: createUser
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+      parameters:
+        - in: body
+          name: payload
+          required: true
+          schema:
+            $ref: "#/definitions/NewUser"
+      responses:
+        "201":
+          description: User created
+  /users/{id}:
+    get:
+      summary: Get a user by ID
+      operationId: getUserById
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: "#/definitions/User"
+        "404":
+          description: User not found
+    delete:
+      summary: Delete a user by ID
+      operationId: deleteUserById
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID of the user to delete
+      responses:
+        "204":
+          description: User deleted
+        "404":
+          description: User not found
+    patch:
+      summary: Update a user by ID
+      operationId: patchUserById
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID of the user to update
+        - in: body
+          name: payload
+          required: true
+          schema:
+            $ref: "#/definitions/PatchUser"
+      responses:
+        "200":
+          description: User updated
+        "404":
+          description: User not found
+definitions:
+  LoginPayload:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+        format: password
+  Todo:
+    type: object
+    properties:
+      id:
+        type: number
+      title:
+        type: string
+      isCompleted:
+        type: boolean
+  NewTodo:
+    type: object
+    required:
+      - title
+    properties:
+      title:
+        type: string
+  PatchTodo:
+    type: object
+    properties:
+      title:
+        type: string
+      isCompleted:
+        type: boolean
+  User:
+    type: object
+    properties:
+      id:
+        type: number
+      name:
+        type: string
+      email:
+        type: string
+        format: email
+      role:
+        type: number
+      subscriptionStatus:
+        type: string
+      emailVerifiedAt:
+        type: string
+        format: date-time
+  NewUser:
+    type: object
+    required:
+      - name
+      - email
+      - password
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+        format: email
+      password:
+        type: string
+        format: password
+  PatchUser:
+    type: object
+    properties:
+      id:
+        type: number
+      name:
+        type: string
+      email:
+        type: string
+        format: email
+      role:
+        type: number
+      subscriptionStatus:
+        type: string
