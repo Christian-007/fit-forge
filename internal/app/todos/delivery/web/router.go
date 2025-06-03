@@ -31,7 +31,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Cache:       appCtx.RedisClient,
 	})
 
-	strictSessionMiddleware := middlewares.StrictSession(authService)
+	strictSessionMiddleware := middlewares.StrictSession(authService, appCtx.SecretManagerClient)
 	subscriptionStatusMiddleware := middlewares.SubscriptionStatus()
 
 	// All routes require auth session check

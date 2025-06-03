@@ -10,6 +10,7 @@
 package mock_services
 
 import (
+	rsa "crypto/rsa"
 	reflect "reflect"
 
 	domains "github.com/Christian-007/fit-forge/internal/app/auth/domains"
@@ -57,18 +58,18 @@ func (mr *MockAuthServiceMockRecorder) Authenticate(loginRequest any) *gomock.Ca
 }
 
 // CreateToken mocks base method.
-func (m *MockAuthService) CreateToken(userId int) (domains.AuthToken, error) {
+func (m *MockAuthService) CreateToken(privateKey *rsa.PrivateKey, userId int) (domains.AuthToken, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateToken", userId)
+	ret := m.ctrl.Call(m, "CreateToken", privateKey, userId)
 	ret0, _ := ret[0].(domains.AuthToken)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateToken indicates an expected call of CreateToken.
-func (mr *MockAuthServiceMockRecorder) CreateToken(userId any) *gomock.Call {
+func (mr *MockAuthServiceMockRecorder) CreateToken(privateKey, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateToken", reflect.TypeOf((*MockAuthService)(nil).CreateToken), userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateToken", reflect.TypeOf((*MockAuthService)(nil).CreateToken), privateKey, userId)
 }
 
 // GetAuthDataFromCache mocks base method.
@@ -130,16 +131,16 @@ func (mr *MockAuthServiceMockRecorder) SaveToken(userResponse, authToken any) *g
 }
 
 // ValidateToken mocks base method.
-func (m *MockAuthService) ValidateToken(tokenString string) (*domains.Claims, error) {
+func (m *MockAuthService) ValidateToken(privateKey *rsa.PrivateKey, tokenString string) (*domains.Claims, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateToken", tokenString)
+	ret := m.ctrl.Call(m, "ValidateToken", privateKey, tokenString)
 	ret0, _ := ret[0].(*domains.Claims)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ValidateToken indicates an expected call of ValidateToken.
-func (mr *MockAuthServiceMockRecorder) ValidateToken(tokenString any) *gomock.Call {
+func (mr *MockAuthServiceMockRecorder) ValidateToken(privateKey, tokenString any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateToken", reflect.TypeOf((*MockAuthService)(nil).ValidateToken), tokenString)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateToken", reflect.TypeOf((*MockAuthService)(nil).ValidateToken), privateKey, tokenString)
 }

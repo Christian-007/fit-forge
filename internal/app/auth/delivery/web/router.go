@@ -24,7 +24,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		UserService: userService,
 		Cache:       appCtx.RedisClient,
 	})
-	logoutSessionMiddleware := middlewares.LogoutSession(authService)
+	logoutSessionMiddleware := middlewares.LogoutSession(authService, appCtx.SecretManagerClient)
 
 	tokenService := security.NewTokenService(security.TokenServiceOptions{
 		SecretKey: os.Getenv("AUTH_SECRET_KEY"),
@@ -36,11 +36,12 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	})
 
 	authHandler := NewAuthHandler(AuthHandlerOptions{
-		AuthService:  authService,
-		Logger:       appCtx.Logger,
-		UserService:  userService,
-		EmailService: emailService,
-		Cache:        appCtx.RedisClient,
+		AuthService:         authService,
+		Logger:              appCtx.Logger,
+		UserService:         userService,
+		EmailService:        emailService,
+		Cache:               appCtx.RedisClient,
+		SecretManagerClient: appCtx.SecretManagerClient,
 	})
 
 	// Public routes

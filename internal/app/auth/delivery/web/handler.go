@@ -2,7 +2,9 @@ package web
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	authdto "github.com/Christian-007/fit-forge/internal/app/auth/dto"
@@ -16,6 +18,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/Christian-007/fit-forge/internal/pkg/requestctx"
+	"github.com/Christian-007/fit-forge/internal/pkg/security"
 	"github.com/Christian-007/fit-forge/internal/utils"
 )
 
@@ -24,11 +27,12 @@ type AuthHandler struct {
 }
 
 type AuthHandlerOptions struct {
-	AuthService  authservices.AuthServiceImpl
-	Logger       applog.Logger
-	EmailService emailservices.EmailService
-	UserService  userservices.UserService
-	Cache        cache.Cache
+	AuthService         authservices.AuthServiceImpl
+	Logger              applog.Logger
+	EmailService        emailservices.EmailService
+	UserService         userservices.UserService
+	Cache               cache.Cache
+	SecretManagerClient security.SecretManageProvider
 }
 
 func NewAuthHandler(options AuthHandlerOptions) AuthHandler {
@@ -64,7 +68,14 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := a.AuthService.CreateToken(userResponse.Id)
+	privateKey, err := a.SecretManagerClient.GetPrivateKey(r.Context(), os.Getenv("GCP_SECRET_DIR"))
+	if err != nil {
+		a.Logger.Error("failed to get private key", slog.String("error", err.Error()))
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	token, err := a.AuthService.CreateToken(privateKey, userResponse.Id)
 	if err != nil {
 		a.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})

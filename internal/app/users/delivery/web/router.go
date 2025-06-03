@@ -43,7 +43,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Cache:       appCtx.RedisClient,
 	})
 
-	strictSessionMiddleware := middlewares.StrictSession(authService)
+	strictSessionMiddleware := middlewares.StrictSession(authService, appCtx.SecretManagerClient)
 
 	adminRole := 1
 	adminRoleMiddleware := middlewares.Role(adminRole)

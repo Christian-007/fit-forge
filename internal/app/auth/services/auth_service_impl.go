@@ -1,7 +1,9 @@
 package services
 
 import (
+	"crypto/rsa"
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -54,22 +56,28 @@ func (a AuthServiceImpl) Authenticate(loginRequest authdto.LoginRequest) (userdt
 	return response, nil
 }
 
-func (a AuthServiceImpl) CreateToken(userId int) (domains.AuthToken, error) {
+func (a AuthServiceImpl) CreateToken(privateKey *rsa.PrivateKey, userId int) (domains.AuthToken, error) {
 	authToken := domains.AuthToken{}
 	uuid := uuid.NewString()
-	secretKey := []byte(os.Getenv("AUTH_SECRET_KEY"))
 	expiresAt := jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
 	claims := domains.Claims{
 		UserID: userId,
 		Uuid:   uuid,
 		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    os.Getenv("JWT_ISSUER_CLAIM"),
+			Audience:  jwt.ClaimStrings{os.Getenv("JWT_AUDIENCE_CLAIM")},
+			Subject:   fmt.Sprintf("%d", userId),
 			ExpiresAt: expiresAt,
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(secretKey)
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	// Set the 'kid' (Key ID) header so verifiers know which public key to use from JWKS
+	token.Header["kid"] = os.Getenv("JWK_KEY_ID")
+
+	tokenString, err := token.SignedString(privateKey)
 	if err != nil {
 		return domains.AuthToken{}, err
 	}
@@ -81,12 +89,13 @@ func (a AuthServiceImpl) CreateToken(userId int) (domains.AuthToken, error) {
 	return authToken, nil
 }
 
-func (a AuthServiceImpl) ValidateToken(tokenString string) (*domains.Claims, error) {
-	secretKey := []byte(os.Getenv("AUTH_SECRET_KEY"))
+func (a AuthServiceImpl) ValidateToken(privateKey *rsa.PrivateKey, tokenString string) (*domains.Claims, error) {
+	publicKey := &privateKey.PublicKey
 	claims := &domains.Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (any, error) {
+		return publicKey, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodRS256.Alg()}))
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			return nil, apperrors.ErrInvalidSignature

@@ -14,6 +14,7 @@ import (
 	"github.com/Christian-007/fit-forge/internal/pkg/applog"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/Christian-007/fit-forge/internal/pkg/decorator"
+	"github.com/Christian-007/fit-forge/internal/pkg/security"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-googlecloud/pkg/googlecloud"
@@ -54,6 +55,27 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Create GCP Secret Manager Client
+	var secretManagerClient security.SecretManageProvider
+	if os.Getenv("ENV") == "production" {
+		secretManagerClient, err = security.NewGCPSecretManagerClient(context.Background())
+		if err != nil {
+			logger.Error("failed to create GCP Secret Manager Client",
+				slog.String("error", err.Error()),
+			)
+			os.Exit(1)
+		}
+	} else {
+		secretManagerClient, err = security.NewLocalSecretManager()
+		if err != nil {
+			logger.Error("failed to create Local Secret Manager",
+				slog.String("error", err.Error()),
+			)
+			os.Exit(1)
+		}
+	}
+	defer secretManagerClient.Close()
+
 	// Create a connection to a Message Broker
 	watermillLogger := watermill.NewStdLogger(false, false)
 	gcloudPublisher, err := googlecloud.NewPublisher(
@@ -73,10 +95,11 @@ func main() {
 
 	// Instantiate the all application dependencies
 	appCtx := appcontext.NewAppContext(appcontext.AppContextOptions{
-		Logger:      logger,
-		Pool:        pool,
-		RedisClient: client,
-		Publisher:   publisher,
+		Logger:              logger,
+		Pool:                pool,
+		RedisClient:         client,
+		Publisher:           publisher,
+		SecretManagerClient: secretManagerClient,
 	})
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
