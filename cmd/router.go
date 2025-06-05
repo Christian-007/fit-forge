@@ -23,7 +23,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"http://localhost:3000"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-Api-Key"},
 	}))
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
