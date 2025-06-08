@@ -23,7 +23,7 @@ func NewEmailService(options EmailServiceOptions) EmailService {
 }
 
 func (e EmailService) CreateVerificationLink(email string) (string, error) {
-	verificationPath := "/auth/verify?token="
+	verificationPath := "/email-verification?token="
 
 	randomToken, err := e.TokenService.Generate()
 	if err != nil {

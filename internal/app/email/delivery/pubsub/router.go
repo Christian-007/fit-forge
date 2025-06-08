@@ -20,7 +20,7 @@ func Routes(router *message.Router, subscriber *googlecloud.Subscriber, appCtx a
 		SecretKey: os.Getenv("AUTH_SECRET_KEY"),
 	})
 	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
-		Host:         "http://localhost:4000",
+		Host:         "http://localhost:3000",
 		Cache:        appCtx.RedisClient,
 		TokenService: tokenService,
 	})
