@@ -37,7 +37,7 @@ func (t TodoRepositoryPg) GetAll() ([]domains.TodoModel, error) {
 }
 
 func (t TodoRepositoryPg) GetAllByUserId(userId int) ([]domains.TodoModel, error) {
-	query := "SELECT * FROM todos WHERE user_id = $1"
+	query := "SELECT * FROM todos WHERE user_id = $1 ORDER BY created_at DESC"
 
 	rows, _ := t.db.Query(context.Background(), query, userId)
 	todos, err := pgx.CollectRows(rows, pgx.RowToStructByName[domains.TodoModel])
