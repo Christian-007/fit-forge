@@ -9,10 +9,8 @@ import (
 	"time"
 
 	"github.com/Christian-007/fit-forge/internal/app/auth/domains"
-	authdto "github.com/Christian-007/fit-forge/internal/app/auth/dto"
 	usersdomain "github.com/Christian-007/fit-forge/internal/app/users/domains"
 	userdto "github.com/Christian-007/fit-forge/internal/app/users/dto"
-	"github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/apperrors"
 	"github.com/Christian-007/fit-forge/internal/pkg/cache"
 	"github.com/golang-jwt/jwt/v5"
@@ -25,7 +23,6 @@ type AuthServiceImpl struct {
 }
 
 type AuthServiceOptions struct {
-	UserService services.UserService
 	Cache       cache.Cache
 }
 
@@ -35,25 +32,13 @@ func NewAuthServiceImpl(options AuthServiceOptions) AuthServiceImpl {
 	}
 }
 
-func (a AuthServiceImpl) Authenticate(loginRequest authdto.LoginRequest) (userdto.UserResponse, error) {
-	user, err := a.UserService.GetOneByEmail(loginRequest.Username)
+func (a AuthServiceImpl) Authenticate(inputtedPassword string, userPassword []byte) error {
+	err := bcrypt.CompareHashAndPassword(userPassword,[]byte(inputtedPassword))
 	if err != nil {
-		return userdto.UserResponse{}, err
+		return apperrors.ErrInvalidCredentials
 	}
 
-	err = bcrypt.CompareHashAndPassword(user.Password, []byte(loginRequest.Password))
-	if err != nil {
-		return userdto.UserResponse{}, apperrors.ErrInvalidCredentials
-	}
-
-	response := userdto.UserResponse{
-		Id:                 user.Id,
-		Name:               user.Name,
-		Email:              user.Email,
-		Role:               user.Role,
-		SubscriptionStatus: user.SubscriptionStatus,
-	}
-	return response, nil
+	return nil
 }
 
 func (a AuthServiceImpl) CreateToken(privateKey *rsa.PrivateKey, userId int) (domains.AuthToken, error) {
@@ -129,6 +114,8 @@ func (a AuthServiceImpl) SaveToken(userResponse userdto.UserResponse, authToken 
 	err := a.Cache.SetHash(authToken.AccessTokenUuid,
 		"userId", userResponse.Id,
 		"role", userResponse.Role,
+		"name", userResponse.Name,
+		"email", userResponse.Email,
 		"subscriptionStatus", string(userResponse.SubscriptionStatus),
 	)
 	if err != nil {

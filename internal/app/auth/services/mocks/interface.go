@@ -14,8 +14,7 @@ import (
 	reflect "reflect"
 
 	domains "github.com/Christian-007/fit-forge/internal/app/auth/domains"
-	dto "github.com/Christian-007/fit-forge/internal/app/auth/dto"
-	dto0 "github.com/Christian-007/fit-forge/internal/app/users/dto"
+	dto "github.com/Christian-007/fit-forge/internal/app/users/dto"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -43,18 +42,17 @@ func (m *MockAuthService) EXPECT() *MockAuthServiceMockRecorder {
 }
 
 // Authenticate mocks base method.
-func (m *MockAuthService) Authenticate(loginRequest dto.LoginRequest) (dto0.UserResponse, error) {
+func (m *MockAuthService) Authenticate(inputtedPassword string, userPassword []byte) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Authenticate", loginRequest)
-	ret0, _ := ret[0].(dto0.UserResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Authenticate", inputtedPassword, userPassword)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Authenticate indicates an expected call of Authenticate.
-func (mr *MockAuthServiceMockRecorder) Authenticate(loginRequest any) *gomock.Call {
+func (mr *MockAuthServiceMockRecorder) Authenticate(inputtedPassword, userPassword any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockAuthService)(nil).Authenticate), loginRequest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockAuthService)(nil).Authenticate), inputtedPassword, userPassword)
 }
 
 // CreateToken mocks base method.
@@ -117,7 +115,7 @@ func (mr *MockAuthServiceMockRecorder) InvalidateToken(accessTokenUuid any) *gom
 }
 
 // SaveToken mocks base method.
-func (m *MockAuthService) SaveToken(userResponse dto0.UserResponse, authToken domains.AuthToken) error {
+func (m *MockAuthService) SaveToken(userResponse dto.UserResponse, authToken domains.AuthToken) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveToken", userResponse, authToken)
 	ret0, _ := ret[0].(error)

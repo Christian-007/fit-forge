@@ -4,13 +4,12 @@ import (
 	"crypto/rsa"
 
 	"github.com/Christian-007/fit-forge/internal/app/auth/domains"
-	authdto "github.com/Christian-007/fit-forge/internal/app/auth/dto"
 	userdto "github.com/Christian-007/fit-forge/internal/app/users/dto"
 )
 
 //go:generate mockgen -source=interface.go -destination=mocks/interface.go
 type AuthService interface {
-	Authenticate(loginRequest authdto.LoginRequest) (userdto.UserResponse, error)
+	Authenticate(inputtedPassword string, userPassword []byte) error
 	CreateToken(privateKey *rsa.PrivateKey, userId int) (domains.AuthToken, error)
 	ValidateToken(privateKey *rsa.PrivateKey, tokenString string) (*domains.Claims, error)
 	InvalidateToken(accessTokenUuid string) error

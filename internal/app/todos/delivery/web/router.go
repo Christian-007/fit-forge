@@ -4,8 +4,6 @@ import (
 	authservices "github.com/Christian-007/fit-forge/internal/app/auth/services"
 	todorepositories "github.com/Christian-007/fit-forge/internal/app/todos/repositories"
 	todoservices "github.com/Christian-007/fit-forge/internal/app/todos/services"
-	userrepositories "github.com/Christian-007/fit-forge/internal/app/users/repositories"
-	userservices "github.com/Christian-007/fit-forge/internal/app/users/services"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
 	"github.com/Christian-007/fit-forge/internal/pkg/middlewares"
 	"github.com/go-chi/chi/v5"
@@ -22,12 +20,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		Publisher: appCtx.Publisher,
 	})
 
-	userRepositoryPg := userrepositories.NewUserRepositoryPg(appCtx.Pool)
-	userService := userservices.NewUserService(userservices.UserServiceOptions{
-		UserRepository: userRepositoryPg,
-	})
 	authService := authservices.NewAuthServiceImpl(authservices.AuthServiceOptions{
-		UserService: userService,
 		Cache:       appCtx.RedisClient,
 	})
 

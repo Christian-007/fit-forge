@@ -49,8 +49,7 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
-
-	userResponse, err := a.AuthService.Authenticate(loginRequest)
+	userResponse, err := a.UserService.GetOneByEmail(loginRequest.Username)
 	if err != nil {
 		a.Logger.Error(err.Error())
 
@@ -58,6 +57,14 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			utils.SendResponse(w, http.StatusNotFound, apphttp.ErrorResponse{Message: "Record not found"})
 			return
 		}
+
+		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
+		return
+	}
+
+	err = a.AuthService.Authenticate(loginRequest.Password, userResponse.Password)
+	if err != nil {
+		a.Logger.Error(err.Error())
 
 		if err == apperrors.ErrInvalidCredentials {
 			utils.SendResponse(w, http.StatusUnauthorized, apphttp.ErrorResponse{Message: "Invalid username or password"})
@@ -82,7 +89,14 @@ func (a AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.AuthService.SaveToken(userResponse, token)
+	dto := userdto.UserResponse{
+		Id:                 userResponse.Id,
+		Name:               userResponse.Name,
+		Email:              userResponse.Email,
+		Role:               userResponse.Role,
+		SubscriptionStatus: userResponse.SubscriptionStatus,
+	}
+	err = a.AuthService.SaveToken(dto, token)
 	if err != nil {
 		a.Logger.Error(err.Error())
 		utils.SendResponse(w, http.StatusInternalServerError, apphttp.ErrorResponse{Message: "Internal Server Error"})
