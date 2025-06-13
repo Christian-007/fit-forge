@@ -21,7 +21,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	})
 
 	authService := authservices.NewAuthServiceImpl(authservices.AuthServiceOptions{
-		Cache:       appCtx.RedisClient,
+		Cache: appCtx.RedisClient,
 	})
 
 	strictSessionMiddleware := middlewares.StrictSession(authService, appCtx.SecretManagerClient)
