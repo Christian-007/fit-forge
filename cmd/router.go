@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	authweb "github.com/Christian-007/fit-forge/internal/app/auth/delivery/web"
+	profileweb "github.com/Christian-007/fit-forge/internal/app/profile/delivery/web"
 	todosweb "github.com/Christian-007/fit-forge/internal/app/todos/delivery/web"
 	usersweb "github.com/Christian-007/fit-forge/internal/app/users/delivery/web"
 	"github.com/Christian-007/fit-forge/internal/pkg/appcontext"
@@ -33,6 +34,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 	r.Mount("/users", usersweb.Routes(appCtx))
 	r.Mount("/todos", todosweb.Routes(appCtx))
 	r.Mount("/auth", authweb.Routes(appCtx))
+	r.Mount("/profile", profileweb.Routes(appCtx))
 
 	return r
 }

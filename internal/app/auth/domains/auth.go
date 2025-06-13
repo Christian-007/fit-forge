@@ -21,4 +21,6 @@ type AuthData struct {
 	UserId             int                            `json:"userId"`
 	Role               int                            `json:"role"`
 	SubscriptionStatus usersdomain.SubscriptionStatus `json:"subscriptionStatus"`
+	Name               string                         `json:"name"`
+	Email              string                         `json:"email"`
 }

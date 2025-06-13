@@ -91,6 +91,8 @@ func StrictSession(authService services.AuthService, secretManagerProvider secur
 			ctx := requestctx.WithUserId(r.Context(), authData.UserId)
 			ctx = requestctx.WithRole(ctx, authData.Role)
 			ctx = requestctx.WithSubscriptionStatus(ctx, authData.SubscriptionStatus)
+			ctx = requestctx.WithName(ctx, authData.Name)
+			ctx = requestctx.WithEmail(ctx, authData.Email)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

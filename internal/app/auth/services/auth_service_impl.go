@@ -23,7 +23,7 @@ type AuthServiceImpl struct {
 }
 
 type AuthServiceOptions struct {
-	Cache       cache.Cache
+	Cache cache.Cache
 }
 
 func NewAuthServiceImpl(options AuthServiceOptions) AuthServiceImpl {
@@ -33,7 +33,7 @@ func NewAuthServiceImpl(options AuthServiceOptions) AuthServiceImpl {
 }
 
 func (a AuthServiceImpl) Authenticate(inputtedPassword string, userPassword []byte) error {
-	err := bcrypt.CompareHashAndPassword(userPassword,[]byte(inputtedPassword))
+	err := bcrypt.CompareHashAndPassword(userPassword, []byte(inputtedPassword))
 	if err != nil {
 		return apperrors.ErrInvalidCredentials
 	}
@@ -156,6 +156,8 @@ func (a AuthServiceImpl) GetHashAuthDataFromCache(accessTokenUuid string) (domai
 		UserId:             userIdInt,
 		Role:               roleInt,
 		SubscriptionStatus: subscriptionStatus,
+		Name:               result["name"],
+		Email:              result["email"],
 	}, nil
 }
 

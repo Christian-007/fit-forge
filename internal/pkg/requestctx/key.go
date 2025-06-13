@@ -8,4 +8,6 @@ const (
 	UserRoleContextKey           = contextKey("role")
 	CorrelationIdContextKey      = contextKey("correlationId")
 	SubscriptionStatusContextKey = contextKey("subscriptionStatus")
+	NameContextKey               = contextKey("name")
+	EmailContextKey              = contextKey("email")
 )
