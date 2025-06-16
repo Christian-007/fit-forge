@@ -41,7 +41,7 @@ func Routes(router *message.Router, subscriber *googlecloud.Subscriber, appCtx a
 			pointModel, err := pointsRepository.UpdateWithTransactionHistory(
 				msg.Context(),
 				userId,
-				domains.PointTransactionsModel{
+				domains.CreatePointTransactions{
 					TransactionType: domains.EarnTransactionType,
 					Reason:          domains.CompleteTodoReason,
 					Points:          addedPoint,

@@ -73,7 +73,7 @@ func (p PointsRepositoryPg) Create(tx pgx.Tx, point domains.PointModel) (domains
 	return insertedPoint, nil
 }
 
-func (p PointsRepositoryPg) UpdateWithTransactionHistory(ctx context.Context, userId int, pointTransaction domains.PointTransactionsModel) (domains.PointModel, error) {
+func (p PointsRepositoryPg) UpdateWithTransactionHistory(ctx context.Context, userId int, pointTransaction domains.CreatePointTransactions) (domains.PointModel, error) {
 	tx, err := p.db.Begin(ctx)
 	if err != nil {
 		return domains.PointModel{}, err

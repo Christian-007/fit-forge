@@ -131,7 +131,7 @@ func (u UserRepositoryPg) CreateWithInitialPoints(ctx context.Context, user doma
 	}
 
 	// Step 3: Log to the point transaction
-	pointTransactions := pointdomains.PointTransactionsModel{
+	pointTransactions := pointdomains.CreatePointTransactions{
 		ID:              uuid.New(),
 		TransactionType: pointdomains.EarnTransactionType,
 		Points:          earnedPoints,

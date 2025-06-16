@@ -10,7 +10,7 @@ import (
 type PointsRepository interface {
 	GetOne(tx pgx.Tx, userId int) (domains.PointModel, error)
 	Create(tx pgx.Tx, point domains.PointModel) (domains.PointModel, error)
-	UpdateWithTransactionHistory(ctx context.Context, userId int, pointTransaction domains.PointTransactionsModel) (domains.PointModel, error)
+	UpdateWithTransactionHistory(ctx context.Context, userId int, pointTransaction domains.CreatePointTransactions) (domains.PointModel, error)
 	// "dueDate" format is "yyyy-mm-dd"
 	FindUsersForSubscriptionDeduction(ctx context.Context, dueDate string) (domains.UsersDueForSubscription, error)
 }

@@ -6,5 +6,5 @@ import (
 )
 
 type PointTransactionsRepostiory interface {
-	Create(tx pgx.Tx, transaction domains.PointTransactionsModel) error
+	Create(tx pgx.Tx, transaction domains.CreatePointTransactions) error
 }

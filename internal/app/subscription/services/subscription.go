@@ -33,7 +33,7 @@ func (s SubscriptionService) ProcessDueSubscriptions(ctx context.Context, dueDat
 	}
 
 	for _, user := range usersDueForSubscription.EligibleForDeduction {
-		_, err := s.PointsRepository.UpdateWithTransactionHistory(ctx, user.Id, domains.PointTransactionsModel{
+		_, err := s.PointsRepository.UpdateWithTransactionHistory(ctx, user.Id, domains.CreatePointTransactions{
 			Points:          domains.SubscriptionDeductionAmount,
 			TransactionType: domains.SubscriptionDeductionTransactionType,
 			Reason:          domains.SubscriptionDeductionReason,

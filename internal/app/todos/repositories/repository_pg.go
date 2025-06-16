@@ -126,7 +126,7 @@ func (t TodoRepositoryPg) CreateWithPoints(ctx context.Context, todo domains.Tod
 	}
 
 	// Step 3: Log to the point transaction
-	pointTransactions := pointdomains.PointTransactionsModel{
+	pointTransactions := pointdomains.CreatePointTransactions{
 		ID:              uuid.New(),
 		TransactionType: pointdomains.EarnTransactionType,
 		Points:          addedPoints,

@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type PointTransactionsModel struct {
+type CreatePointTransactions struct {
 	ID              uuid.UUID       `json:"id"`
 	TransactionType TransactionType `json:"transaction_type"`
 	Points          int             `json:"points"`
