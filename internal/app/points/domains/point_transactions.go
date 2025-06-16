@@ -6,6 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type PointTransaction struct {
+	ID              uuid.UUID       `json:"id"`
+	TransactionType TransactionType `json:"transaction_type"`
+	Points          int             `json:"points"`
+	Reason          Reason          `json:"reason"`
+	CreatedAt       time.Time       `json:"created_at"`
+}
+
 type CreatePointTransactions struct {
 	ID              uuid.UUID       `json:"id"`
 	TransactionType TransactionType `json:"transaction_type"`

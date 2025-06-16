@@ -22,3 +22,31 @@ func (p PointTransactionsRepositoryPg) Create(tx pgx.Tx, transaction domains.Cre
 
 	return err
 }
+
+func (p PointTransactionsRepositoryPg) GetAllWithPagination(ctx context.Context, userId int, limit int, offset int) ([]domains.PointTransaction, int, error) {
+	query := `
+		SELECT id, transaction_type, points, reason, created_at
+		FROM point_transactions
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3
+	`
+
+	rows, _ := p.db.Query(ctx, query, userId, limit, offset)
+	pointTransactions, err := pgx.CollectRows(rows, pgx.RowToStructByName[domains.PointTransaction])
+	if err != nil {
+		return nil, 0, err
+	}
+
+	defer rows.Close()
+
+	countQuery := `SELECT COUNT(*) FROM point_transactions WHERE user_id = $1`
+	var total int
+	err = p.db.QueryRow(ctx, countQuery, userId).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return pointTransactions, total, nil
+}
+
