@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	authweb "github.com/Christian-007/fit-forge/internal/app/auth/delivery/web"
 	pointsweb "github.com/Christian-007/fit-forge/internal/app/points/delivery/web"
@@ -23,7 +24,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 
 	r.Use(logRequest)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedOrigins: []string{os.Getenv("FRONTEND_URL")},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-Api-Key"},
 	}))

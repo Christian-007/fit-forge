@@ -23,7 +23,7 @@ func Routes(appCtx appcontext.AppContext) *chi.Mux {
 		SecretKey: os.Getenv("AUTH_SECRET_KEY"),
 	})
 	emailService := emailservices.NewEmailService(emailservices.EmailServiceOptions{
-		Host:         "http://localhost:4000",
+		Host:         os.Getenv("FRONTEND_URL"),
 		Cache:        appCtx.RedisClient,
 		TokenService: tokenService,
 	})
