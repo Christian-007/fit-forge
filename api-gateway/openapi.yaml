@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: Fit Forge API
   description: API Gateway for Fit Forge's monolithic service deployed on Cloud Run
@@ -16,7 +16,7 @@ securityDefinitions:
     authorizationUrl: "" # Simple Bearer token flow
     flow: "implicit" # Required for oauth2 type in Swagger 2.0
     type: "oauth2"
-    x-google-issuer: "https://fit-forge-prod-669788535349.us-central1.run.app" 
+    x-google-issuer: "https://fit-forge-prod-669788535349.us-central1.run.app"
     x-google-jwks_uri: "https://storage.googleapis.com/fit-forge-jwks-bucket/jwks.json"
     x-google-audiences: "fit-forge-api"
 paths:
@@ -31,7 +31,7 @@ paths:
       security:
         - api_key_1: []
       responses:
-        '200':
+        "200":
           description: Ok
   # --- Auth Endpoints ---
   /auth/login:
@@ -50,9 +50,9 @@ paths:
           schema:
             $ref: "#/definitions/LoginPayload"
       responses:
-        '200':
+        "200":
           description: A successful response
-        '401':
+        "401":
           description: Unauthorized
   /auth/verify/{token}:
     post:
@@ -70,9 +70,9 @@ paths:
           required: true
           description: Token to verify
       responses:
-        '200':
+        "200":
           description: A successful response
-        '401':
+        "401":
           description: Invalid token
   /auth/logout:
     post:
@@ -85,7 +85,7 @@ paths:
         - api_key_1: []
         - jwt_auth: []
       responses:
-        '200':
+        "200":
           description: Logout successful
   # --- Todos Endpoints ---
   /todos:
@@ -99,7 +99,7 @@ paths:
         - api_key_1: []
         - jwt_auth: []
       responses:
-        '200':
+        "200":
           description: A list of todos for the authenticated user
           schema:
             type: array
@@ -311,6 +311,47 @@ paths:
           description: User updated
         "404":
           description: User not found
+  # --- Profile Endpoints ---
+  /profile:
+    get:
+      summary: Get the user's profile
+      operationId: getUserProfile
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: "#/definitions/UserProfile"
+  # --- Point Transactions Endpoints ---
+  /point-transactions:
+    get:
+      summary: Get the user's point transaction history
+      operationId: getPointTransactionHistory
+      x-google-backend:
+        address: https://fit-forge-prod-669788535349.us-central1.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+      security:
+        - api_key_1: []
+        - jwt_auth: []
+      parameters:
+        - in: query
+          name: offset
+          type: integer
+          description: The number of items to skip before starting to collect the result set
+        - in: query
+          name: limit
+          type: integer
+          description: The numbers of items to return
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: "#/definitions/PointTransaction"
 definitions:
   LoginPayload:
     type: object
@@ -363,6 +404,20 @@ definitions:
       emailVerifiedAt:
         type: string
         format: date-time
+  UserProfile:
+    type: object
+    properties:
+      userId:
+        type: number
+      name:
+        type: string
+      email:
+        type: string
+        format: email
+      role:
+        type: number
+      subscriptionStatus:
+        type: string
   NewUser:
     type: object
     required:
@@ -392,3 +447,30 @@ definitions:
         type: number
       subscriptionStatus:
         type: string
+  PointTransaction:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            transaction_type:
+              type: string
+            points:
+              type: integer
+            reason:
+              type: string
+            created_at:
+              type: string
+      meta:
+        type: object
+        properties:
+          total:
+            type: integer
+          limit:
+            type: integer
+          offset:
+            type: integer
