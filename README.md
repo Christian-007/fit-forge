@@ -1,3 +1,26 @@
+# Cloud Architecture Diagram
+
+This project mainly utilises Google Cloud Platform products to achieve high scalability and availability. Cloudflare Registrar and proxied DNS are also used on top of Google Cloud services to protect the site and APIs from DDoS attacks and to optimize images.
+
+![Dexalune's Cloud Architecture](https://github.com/Christian-007/fit-forge/blob/master/docs/dexalune-cloud-architecture.png?raw=true)
+
+## Related repositories
+
+- Frontend (Next.js): https://github.com/Christian-007/fit-forge-nextjs
+- Core API (Go): https://github.com/Christian-007/fit-forge
+- Notification API (Go): https://github.com/Christian-007/fit-forge-notification
+- Scheduler (Go): https://github.com/Christian-007/fit-forge-scheduler
+
+## Tech Stack
+
+- Language: `Go`
+- Event-driven library: `Watermill`
+- Cloud: `Cloudflare`, `Cloud Run`, `API Gateway`, `Pub/Sub`, `Load Balancer`, `GCS Bucket`, `Secret Manager`, `Artifact Registry`
+- Email testing: `Mailtrap`
+- DB: `Redis`, `PostgreSQL`
+
+# Installing on a local machine
+
 ## Prerequisites
 
 Before getting started, ensure you have done the following things:
@@ -20,13 +43,13 @@ To start this repo on your machine, do the following:
 8.  Run `make generate_jwks` to generate the necessary secrets
 9.  Finally, `make run` to run the Go app with `.env` file
 
-## Manual Deployment to GCP
+# Manual Deployment to GCP
 
 This project is deployed to **GCP Artifact Registry**, **Cloud Run** and **API Gateway** using a combination of `gcloud` CLI and GCP Console. Before start deploying the app, do the following step:
 
 - Authenticate a user using `gcloud auth application-default login --no-launch-browser` (using `--no-launch-browser` somehow that works)
 
-### 1. Create a new repository on Artifact Registry
+## 1. Create a new repository on Artifact Registry
 
 1. Login to GCP Console (https://console.cloud.google.com/)
 2. Select "Artifact Registry" menu
@@ -35,14 +58,14 @@ This project is deployed to **GCP Artifact Registry**, **Cloud Run** and **API G
 5. Ensure the format is `Docker` and use `us-central1` as the region or other regions that are within the Free tier
 6. Click 'Create'
 
-### 2. Dockerize the app and push the image to Artifact Registry
+## 2. Dockerize the app and push the image to Artifact Registry
 
 1. Go back to the terminal and dockerize the app using `docker buildx build -t us-central1-docker.pkg.dev/{project-id}/{repository-name}/{app-name}:1.0.0 .` command (note that the command ends with `.`)
 2. Once the Docker image is created, we push it using `docker push us-central1-docker.pkg.dev/{project-id}/{repository-name}/{app-name}:1.0.0` command
 
 _Note: `project-id` is the GCP project ID, `repository-name` is what you created on Step 1.4, `app-name` is the name of the app (can be anything)_
 
-### 3. Create service and deploy Cloud Run
+## 3. Create service and deploy Cloud Run
 
 1. Go back to GCP Console and select or find "Cloud Run" menu
 2. Click "Services" > "+ Deploy Container"
@@ -53,7 +76,7 @@ _Note: `project-id` is the GCP project ID, `repository-name` is what you created
 7. Setup the corresponding environment variables on "Containers, Volumes, Networking, Security" > "Containers" > "Variables & Secrets"
 8. Click "Create"
 
-### 4. Create an API Gateway
+## 4. Create an API Gateway
 
 1. Create an OpenAPI specification named `openapi.yaml` in the repository (all of routes and their HTTP methods need to be defined in API Gateway)
 2. Go to GCP Console and select "API Gateway" menu
@@ -61,7 +84,7 @@ _Note: `project-id` is the GCP project ID, `repository-name` is what you created
 
 That's the gist of deploying this repository on GCP.
 
-## Environment Variables
+# Environment Variables
 
 Setup the following environment variables in `./.env` file:
 
